@@ -22,6 +22,7 @@ test_piccolo:
     - git clean -f
     - pip install --break-system-packages cocotb
     - pushd RTOSUnit
+    - rm -rf BSVTools
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
     - python3 BSVTools/bsvAdd.py
     - popd
@@ -82,6 +83,7 @@ test_cv32e40p:
     - git clean -f
     - pip install --break-system-packages cocotb
     - pushd RTOSUnit
+    - rm -rf BSVTools
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
     - python3 BSVTools/bsvAdd.py
     - popd

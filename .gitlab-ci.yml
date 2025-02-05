@@ -24,7 +24,7 @@ test_piccolo:
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
     - python3 BSVTools/bsvAdd.py
     - popd
-    - git submodule update --init --recursive
+    - git submodule -c submodule.freertos/RTOSBench/example/freertos-rpi2/freertos.update=none update --init --recursive
     - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so
     - export PATH=$BLUESPEC_HOME/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
@@ -83,7 +83,7 @@ test_cv32e40p:
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
     - python3 BSVTools/bsvAdd.py
     - popd
-    - git submodule update --init --recursive
+    - git submodule -c submodule.freertos/RTOSBench/example/freertos-rpi2/freertos.update=none update --init --recursive
     - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so
     - export PATH=$BLUESPEC_HOME/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY

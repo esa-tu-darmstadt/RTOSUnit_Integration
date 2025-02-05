@@ -1,58 +1,20 @@
-# Makefile
 
-# defaults
-SIM ?= verilator
-TOPLEVEL_LANG ?= verilog
-EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC
+.PHONY: freertos
+freertos:
+	cd freertos && make
 
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_apu_core_pkg.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_fpu_pkg.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_pkg.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_if_stage.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_cs_registers.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_register_file_ff.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_load_store_unit.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_id_stage.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_aligner.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_decoder.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_compressed_decoder.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_fifo.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_prefetch_buffer.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_hwloop_regs.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_mult.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_int_controller.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_ex_stage.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_alu_div.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_alu.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_ff_one.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_popcnt.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_apu_disp.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_controller.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_obi_interface.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_prefetch_controller.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_sleep_unit.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_core.sv
+.PHONY: clean
+clean:
+	cd freertos && make clean
 
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_top.sv
+.PHONY: piccolo
+piccolo: freertos
+	cd RTOSUnit && make
 
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/../bhv/cv32e40p_sim_clock_gate.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/../bhv/include/cv32e40p_tracer_pkg.sv
-VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/../bhv/cv32e40p_tb_wrapper.sv
+.PHONY: ctxunit
+ctxunit:
+	cd RTOSUnit && TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG ip
 
-VERILOG_SOURCES += $(PWD)/simulation_wrappers/cv32e40p_tb_top.sv
-VERILOG_SOURCES += $(PWD)/RTOSUnit/build/verilog/mkRTOSUnitSynth.v
-
-VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/include
-VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/../bhv
-VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/../bhv/include
-VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/../sva
-# use VHDL_SOURCES for VHDL files
-
-# TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
-TOPLEVEL = cv32e40p_tb_top
-
-# MODULE is the basename of the Python test file
-MODULE = cocotb_modules.cv32e40p
-
-# include cocotb's make rules to take care of the simulator setup
-include $(shell cocotb-config --makefiles)/Makefile.sim
+.PHONY: cv32e40p
+cv32e40p: freertos ctxunit
+	make -f Makefile_cv32e40p

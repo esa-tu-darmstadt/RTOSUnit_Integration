@@ -30,11 +30,8 @@ test:
     - pushd RTOSBench
     - patch -p1 < ../remove_intermediary_test_results.patch
     - popd
-    - CROSS=riscv64-unknown-elf- make
     - popd
-    - pushd RTOSUnit
-    - make | tee ../logfile
-    - popd
+    - CROSS=riscv64-unknown-elf- make $CORE | tee logfile
     - mkdir -p log/$TEST
     - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
     - grep "elapsed:" logfile
@@ -49,25 +46,28 @@ test:
         LATCH: "NO"
         DIRTY: N
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [piccolo, cv32e40p]
       - LOAD: SW
         STORE: HW
         SCHED: [HW, SW]
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [piccolo]
       - LOAD: HW
         STORE: HW
         SCHED: [HW, SW]
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [piccolo]
       - LOAD: HW
         STORE: HW
         SCHED: HW
         LATCH: [LD, ST, BOTH]
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
-
+        CORE: [piccolo]
 
 collect_results:
   stage: eval

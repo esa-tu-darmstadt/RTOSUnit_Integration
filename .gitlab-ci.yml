@@ -19,6 +19,7 @@ test_piccolo:
     - apt-get -y update
     - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
     - apt-get -y install pip verilator git
+    - git clean -f
     - pip install --break-system-packages cocotb
     - pushd RTOSUnit
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
@@ -78,6 +79,7 @@ test_cv32e40p:
     - apt-get -y update
     - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
     - apt-get -y install pip verilator git
+    - git clean -f
     - pip install --break-system-packages cocotb
     - pushd RTOSUnit
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git

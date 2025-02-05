@@ -12,7 +12,7 @@ variables:
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
 
-test:
+test_piccolo:
   stage: test
   timeout: 5h
   script:
@@ -46,7 +46,7 @@ test:
         LATCH: "NO"
         DIRTY: N
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
-        CORE: [piccolo, cv32e40p]
+        CORE: [piccolo]
       - LOAD: SW
         STORE: HW
         SCHED: [HW, SW]
@@ -68,6 +68,42 @@ test:
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
         CORE: [piccolo]
+
+test_cv32e40p:
+  stage: test
+  timeout: 5h
+  script:
+    - pushd RTOSUnit
+    - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
+    - python3 BSVTools/bsvAdd.py
+    - popd
+    - apt-get -y update
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
+    - git submodule update --init
+    - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so
+    - export PATH=$BLUESPEC_HOME/bin:$PATH
+    - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
+    - pushd freertos
+    - pushd RTOSBench
+    - patch -p1 < ../remove_intermediary_test_results.patch
+    - popd
+    - popd
+    - CROSS=riscv64-unknown-elf- make $CORE | tee logfile
+    - mkdir -p log/$TEST
+    - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
+    - grep "elapsed:" logfile
+  artifacts:
+    paths:
+    - log/*
+  parallel:
+    matrix:
+      - LOAD: SW
+        STORE: SW
+        SCHED: [HW, SW]
+        LATCH: "NO"
+        DIRTY: N
+        TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [cv32e40p]
 
 collect_results:
   stage: eval

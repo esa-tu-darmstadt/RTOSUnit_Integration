@@ -1,4 +1,4 @@
-image: ubuntu
+image: jhvjkcyyfdxghjk/multicontext_ci
 
 stages:
   - test
@@ -8,7 +8,7 @@ stages:
 variables:
   BLUESPECDIR: "/opt/cad/bluespec/latest/lib"
   BLUESPEC_HOME: "/opt/cad/bluespec/latest"
-  GIT_SUBMODULE_STRATEGY: none
+  GIT_SUBMODULE_STRATEGY: recursive
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
 
@@ -16,18 +16,9 @@ test_piccolo:
   stage: test
   timeout: 5h
   script:
-    - apt-get -y update
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
-    - apt-get -y install pip verilator git
-    - git clean -f
-    - pip install --break-system-packages cocotb
     - pushd RTOSUnit
-    - rm -rf BSVTools
-    - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
-    - python3 BSVTools/bsvAdd.py
+    - python3 /opt/bsvtools/bsvAdd.py
     - popd
-    - git submodule -c submodule.freertos/RTOSBench/example/freertos-rpi2/freertos.update=none update --init --recursive
-    - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so
     - export PATH=$BLUESPEC_HOME/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
@@ -77,18 +68,9 @@ test_cv32e40p:
   stage: test
   timeout: 5h
   script:
-    - apt-get -y update
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
-    - apt-get -y install pip verilator git
-    - git clean -f
-    - pip install --break-system-packages cocotb
     - pushd RTOSUnit
-    - rm -rf BSVTools
-    - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
-    - python3 BSVTools/bsvAdd.py
+    - python3 /opt/bsvtools/bsvAdd.py
     - popd
-    - git submodule -c submodule.freertos/RTOSBench/example/freertos-rpi2/freertos.update=none update --init --recursive
-    - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so
     - export PATH=$BLUESPEC_HOME/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos

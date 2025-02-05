@@ -19,7 +19,7 @@ test_piccolo:
     - apt-get -y update
     - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
     - apt-get -y install pip verilator git
-    - pip install cocotb
+    - pip install --break-system-packages cocotb
     - pushd RTOSUnit
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
     - python3 BSVTools/bsvAdd.py
@@ -75,13 +75,15 @@ test_cv32e40p:
   stage: test
   timeout: 5h
   script:
+    - apt-get -y update
+    - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
+    - apt-get -y install pip verilator git
+    - pip install --break-system-packages cocotb
     - pushd RTOSUnit
     - git clone https://github.com/esa-tu-darmstadt/BSVTools.git
     - python3 BSVTools/bsvAdd.py
     - popd
-    - apt-get -y update
-    - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
-    - git submodule update --init
+    - git submodule update --init --recursive
     - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so
     - export PATH=$BLUESPEC_HOME/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
@@ -112,7 +114,7 @@ collect_results:
   script:
     - apt-get -y update
     - apt-get -y install pip
-    - pip install pandas matplotlib seaborn
+    - pip install --break-system-packages pandas matplotlib seaborn
     - python3 util/plot_logs.py
   artifacts:
     paths:

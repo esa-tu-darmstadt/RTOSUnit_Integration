@@ -13,7 +13,7 @@ piccolo: freertos
 
 .PHONY: ctxunit
 ctxunit:
-	cd RTOSUnit && TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG ip
+	cd RTOSUnit && TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG compile_top
 
 .PHONY: cv32e40p
 cv32e40p: freertos ctxunit

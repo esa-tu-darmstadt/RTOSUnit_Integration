@@ -1,4 +1,4 @@
-module tb_top (
+module cv32e40p_tb_top (
     // Clock and Reset
     input logic clk_i,
     input logic rst_ni,

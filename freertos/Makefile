@@ -58,7 +58,7 @@ CFLAGS  += -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-fdata-sections \
 	-fno-builtin-printf \
 	-fno-zero-initialized-in-bss \
-	-D NB_ITER=1000
+	-D NB_ITER=1
 LDFLAGS = -nostartfiles \
 	-march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-Xlinker --gc-sections \
@@ -92,7 +92,7 @@ DEPS = $(SRCS:%.c=$(BUILD_DIR)/%$(XLEN).d) $(ASMS:%.S=$(BUILD_DIR)/%$(XLEN).d)
 all: bsv_binaries $(BUILD_DIR)/RTOSDemo$(XLEN).dump
 
 bsv_binaries: $(BUILD_DIR)/RTOSDemo$(XLEN).bin
-	python3 ../customTests/hexConverter.py $(BUILD_DIR)/RTOSDemo$(XLEN).bin -o $(BUILD_DIR)/RTOSDemo -b 0x80000
+	python3 ./hexConverter.py $(BUILD_DIR)/RTOSDemo$(XLEN).bin -o $(BUILD_DIR)/RTOSDemo -b 0x80000
 
 $(BUILD_DIR)/RTOSDemo$(XLEN).dump: $(BUILD_DIR)/RTOSDemo$(XLEN).axf
 	$(OBJDUMP) -D $^ > $@

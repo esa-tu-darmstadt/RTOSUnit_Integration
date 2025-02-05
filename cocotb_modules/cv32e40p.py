@@ -2,10 +2,11 @@ import cocotb
 from cocotb.triggers import FallingEdge, RisingEdge, Timer
 from cocotb.clock import Clock
 import sys
+import os
 
 # preload memory model
 memory = [0]*(0x100000)
-mem_bin = open("/scratch/ms/S4E/piccolo_multi_context_support/test_setup/freertos/build/RTOSDemo32.bin", "rb").read()
+mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
 #mem_bin = open("/home/wimi/ms/Downloads/tb.bin", "rb").read()
 no_words = int(len(mem_bin)/4)
 no_bytes = int(len(mem_bin))

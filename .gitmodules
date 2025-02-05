@@ -1,0 +1,6 @@
+[submodule "freertos/RTOSBench"]
+	path = freertos/RTOSBench
+	url = https://github.com/Brannium/RTOSBench.git
+[submodule "freertos/FreeRTOS-Kernel"]
+	path = freertos/FreeRTOS-Kernel
+	url = ../freertos

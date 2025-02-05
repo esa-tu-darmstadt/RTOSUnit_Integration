@@ -1,0 +1,91 @@
+diff --git a/tests/mq/mq.c b/tests/mq/mq.c
+index 323c357..800052f 100644
+--- a/tests/mq/mq.c
++++ b/tests/mq/mq.c
+@@ -89,7 +89,7 @@ no_task_retval_t receiver(no_task_argument_t args)
+ #endif
+ 	}
+ 
+-	REPORT_BENCHMARK_RESULTS("-- MQ: Receive block --")
++	//REPORT_BENCHMARK_RESULTS("-- MQ: Receive block --")
+ 	RESET_TIME_STATS()
+ 
+ 	for (i = 0; i < NB_ITER; i++)
+diff --git a/tests/mq/mq_processing.c b/tests/mq/mq_processing.c
+index 6a76677..c1d136e 100644
+--- a/tests/mq/mq_processing.c
++++ b/tests/mq/mq_processing.c
+@@ -61,7 +61,7 @@ no_task_retval_t task(no_task_argument_t args)
+ #endif
+ 	}
+ 
+-	REPORT_BENCHMARK_RESULTS("--- MQ Send ---");
++	//REPORT_BENCHMARK_RESULTS("--- MQ Send ---");
+ 	RESET_TIME_STATS();
+ 
+ 	/* 1a - Measure MQ receive. */
+diff --git a/tests/mutex/mutex.c b/tests/mutex/mutex.c
+index eeb5efc..05b130d 100644
+--- a/tests/mutex/mutex.c
++++ b/tests/mutex/mutex.c
+@@ -86,7 +86,7 @@ no_task_retval_t receiver(no_task_argument_t args)
+ #endif
+ 	}
+ 
+-	REPORT_BENCHMARK_RESULTS("-- Mutex release unblock --")
++	//REPORT_BENCHMARK_RESULTS("-- Mutex release unblock --")
+ 	RESET_TIME_STATS()
+ 
+ 	for (i = 0; i < NB_ITER; i++)
+diff --git a/tests/mutex/mutex_processing.c b/tests/mutex/mutex_processing.c
+index 0377772..3050da7 100644
+--- a/tests/mutex/mutex_processing.c
++++ b/tests/mutex/mutex_processing.c
+@@ -60,7 +60,7 @@ no_task_retval_t task(no_task_argument_t args)
+ #endif
+ 	}
+ 
+-	REPORT_BENCHMARK_RESULTS("--- mutex acquisition ---");
++	//REPORT_BENCHMARK_RESULTS("--- mutex acquisition ---");
+ 	RESET_TIME_STATS();
+ 
+ 	/* 2 - Measure mutex release time */
+diff --git a/tests/partition/jitter.c b/tests/partition/jitter.c
+index 7e281ef..06737eb 100644
+--- a/tests/partition/jitter.c
++++ b/tests/partition/jitter.c
+@@ -86,6 +86,8 @@ no_task_retval_t monitor(no_task_argument_t args)
+ 		no_task_yield();
+ 	}
+ 
++	REPORT_BENCHMARK_RESULTS("-- Jitter done --")
++
+ 	no_task_suspend_self();
+ 
+ 	return TASK_DEFAULT_RETURN;
+diff --git a/tests/semaphore/sem.c b/tests/semaphore/sem.c
+index 1b76eea..d10e1fe 100644
+--- a/tests/semaphore/sem.c
++++ b/tests/semaphore/sem.c
+@@ -89,7 +89,7 @@ no_task_retval_t receiver(no_task_argument_t args)
+ #endif
+ 	}
+ 
+-	REPORT_BENCHMARK_RESULTS("-- Sem: Wait block --")
++	//REPORT_BENCHMARK_RESULTS("-- Sem: Wait block --")
+ 	RESET_TIME_STATS()
+ 
+ 	for (i = 0; i < NB_ITER; i++)
+diff --git a/tests/semaphore/sem_processing.c b/tests/semaphore/sem_processing.c
+index 94faa46..64985f5 100644
+--- a/tests/semaphore/sem_processing.c
++++ b/tests/semaphore/sem_processing.c
+@@ -60,7 +60,7 @@ no_task_retval_t task(no_task_argument_t args)
+ #endif
+ 	}
+ 
+-	REPORT_BENCHMARK_RESULTS("--- Sem: Signal ---");
++	//REPORT_BENCHMARK_RESULTS("--- Sem: Signal ---");
+ 
+ 	RESET_TIME_STATS();
+ 

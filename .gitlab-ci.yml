@@ -1,4 +1,4 @@
-image: runtimeverificationinc/riscv-gnu-toolchain:ubuntu-jammy-2024.04.12
+image: ubuntu
 
 stages:
   - test
@@ -22,7 +22,7 @@ test_piccolo:
     - popd
     - apt-get -y update
     - DEBIAN_FRONTEND=noninteractive apt-get install -y libtcl
-    - apt-get -y install pip
+    - apt-get -y install pip verilator
     - pip install cocotb
     - git submodule update --init
     - ln -s /usr/lib/x86_64-linux-gnu/libtcl8.6.so.0 /usr/lib/x86_64-linux-gnu/libtcl8.5.so

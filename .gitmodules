@@ -4,3 +4,9 @@
 [submodule "freertos/FreeRTOS-Kernel"]
 	path = freertos/FreeRTOS-Kernel
 	url = ../freertos
+[submodule "RTOSUnit"]
+	path = RTOSUnit
+	url = ../rtosunit
+[submodule "cores/cv32e40p"]
+	path = cores/cv32e40p
+	url = ../cv32e40p

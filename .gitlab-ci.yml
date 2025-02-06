@@ -1,4 +1,4 @@
-image: jhvjkcyyfdxghjk/multicontext_ci
+image: jhvjkcyyfdxghjk/multicontext_ci:latest
 
 stages:
   - test

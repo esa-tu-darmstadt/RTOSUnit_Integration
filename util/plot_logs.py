@@ -27,6 +27,7 @@ def plot(df, name):
     plt.xticks(rotation=15, ha='right')
     plt.tight_layout()
     plt.savefig(f"{name}.png", dpi=600)
+    plt.close()
 
 
 def gather_data(test_name):
@@ -60,21 +61,25 @@ def gather_data(test_name):
 
     all_dfs.append(df)
 
-    plot(df, test_name.split('/')[-1])
+    plot(df, test_name.split('/')[1] + "_" + test_name.split('/')[-1])
     
 
-# List to store the directories
-directories = []
+for entry in os.scandir("log"):
+    if entry.is_dir():  # Check if the entry is a directory
+        print(entry.name)  # Print the name of the directory
 
-# Walk through the root folder
-for root, dirs, files in os.walk("log"):
-    # Check if the current path is exactly two levels deep
-    if root.count(os.sep) == 2:
-        directories.append(root)
+        # List to store the directories
+        directories = []
 
-for f in directories:
-    gather_data(f)
+        # Walk through the root folder
+        for root, dirs, files in os.walk(f"log/{entry.name}"):
+            # Check if the current path is exactly two levels deep
+            if root.count(os.sep) == 3:
+                directories.append(root)
 
-# plot combined statistics
-merged_df = pd.concat(all_dfs, ignore_index=True)
-plot(merged_df, "all")
+        for f in directories:
+            gather_data(f)
+
+        # plot combined statistics
+        merged_df = pd.concat(all_dfs, ignore_index=True)
+        plot(merged_df, f"{entry.name}_all")

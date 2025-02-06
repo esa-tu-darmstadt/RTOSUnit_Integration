@@ -27,8 +27,8 @@ test_piccolo:
     - popd
     - popd
     - make $CORE | tee logfile
-    - mkdir -p log/$TEST
-    - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
+    - mkdir -p log/$CORE/$TEST
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
     - grep "elapsed:" logfile
   artifacts:
     paths:
@@ -79,8 +79,8 @@ test_cv32e40p:
     - popd
     - popd
     - make $CORE | tee logfile
-    - mkdir -p log/$TEST
-    - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
+    - mkdir -p log/$CORE/$TEST
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
   artifacts:
     paths:
     - log/*

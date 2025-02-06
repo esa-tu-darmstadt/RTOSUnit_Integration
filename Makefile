@@ -1,7 +1,7 @@
 
 .PHONY: freertos
 freertos:
-	cd freertos && make
+	cd freertos && make clean && make
 
 .PHONY: clean
 clean:

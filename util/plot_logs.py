@@ -15,7 +15,7 @@ def plot(df, name):
     plt.figure(figsize=(32, 12))
 
     ax = sns.violinplot(df, inner=None, alpha=0.1)
-    plt.ylim(0, 2000)
+    plt.ylim(0, float(df.max().max())*1.1)
     sns.stripplot(df, jitter=False, size=15, ax=ax, alpha = 0.5)
     plt.ylabel("cycles per interrupt handling", fontsize=30)
     plt.xlabel("system configuration", fontsize=30, labelpad=50)
@@ -83,3 +83,4 @@ for entry in os.scandir("log"):
         # plot combined statistics
         merged_df = pd.concat(all_dfs, ignore_index=True)
         plot(merged_df, f"{entry.name}_all")
+        all_dfs.clear()

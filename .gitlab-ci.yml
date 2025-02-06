@@ -19,14 +19,14 @@ test_piccolo:
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py
     - popd
-    - export PATH=$BLUESPEC_HOME/bin:$PATH
+    - export PATH=$BLUESPEC_HOME/bin:/opt/riscv/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
     - pushd RTOSBench
     - patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
-    - CROSS=riscv64-unknown-elf- make $CORE | tee logfile
+    - make $CORE | tee logfile
     - mkdir -p log/$TEST
     - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
     - grep "elapsed:" logfile
@@ -71,14 +71,14 @@ test_cv32e40p:
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py
     - popd
-    - export PATH=$BLUESPEC_HOME/bin:$PATH
+    - export PATH=$BLUESPEC_HOME/bin:/opt/riscv/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
     - pushd RTOSBench
     - patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
-    - CROSS=riscv64-unknown-elf- make $CORE | tee logfile
+    - make $CORE | tee logfile
     - mkdir -p log/$TEST
     - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
     - grep "elapsed:" logfile

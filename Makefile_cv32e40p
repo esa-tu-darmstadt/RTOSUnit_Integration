@@ -3,7 +3,7 @@
 # defaults
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
-EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC
+EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC
 
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_apu_core_pkg.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_fpu_pkg.sv
@@ -11,6 +11,7 @@ VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_pkg.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_if_stage.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_cs_registers.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_register_file_ff.sv
+VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_register_file_multiplex.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_load_store_unit.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_id_stage.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/cv32e40p_aligner.sv

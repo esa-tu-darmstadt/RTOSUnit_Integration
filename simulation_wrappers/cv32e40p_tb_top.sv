@@ -171,7 +171,9 @@ cv32e40p_top #(
     .ctx_op_funct3_o(custom_inst_funct3_c_to_u),
     .ctx_rs1_id_o(custom_inst_id_c_to_u),
     .ctx_rs2_prio_o(custom_inst_prio_c_to_u),
-    .ctx_rd_write_data_i(custom_inst_u_to_c)
+    .ctx_rd_write_data_i(custom_inst_u_to_c),
+    .ctx_mret_o(EN_mret_c_to_u),
+    .ctx_trap_o(EN_trap_c_to_u)
 );
 
 // Instantiate mkRTOSUnitSynth

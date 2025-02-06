@@ -81,7 +81,6 @@ test_cv32e40p:
     - make $CORE | tee logfile
     - mkdir -p log/$TEST
     - cat logfile | grep TOOK | tee log/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
-    - grep "elapsed:" logfile
   artifacts:
     paths:
     - log/*

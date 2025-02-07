@@ -80,6 +80,35 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
 
 
 
+async def memory_sim_write_rtosunit(dut, dbg = False):
+    while True:
+        await FallingEdge(dut.clk_i)
+        # check WE if available
+        ena = dut.ctx_mem_wr_en_o.value
+
+        # assert that this cannot happen at the same time as a mem access from core
+        if ena == 1 and dut.data_req_o.value == 1:
+            print("ERROR: Context unit access during CPU memory access. Abort!")
+            exit(-1)
+
+        # elapsing writes
+        if ena == 1:
+            addr = dut.ctx_mem_wr_addr_o.value
+            data = dut.ctx_mem_wr_data_o.value
+
+            if dbg:
+                print(f"RTOSUnit write: {hex(addr)} : {hex(data)}")
+
+            for i in range(4):
+                addr_w = addr + i
+                data_w = int(data).to_bytes(4, byteorder = 'little')
+                try:
+                    memory[addr_w] = data_w[i]
+                except:
+                    print("UNKNOWN ADDRESS")
+
+
+
 async def clint(dut, dbg_name, dbg = False):
 
     mtime = 0
@@ -161,6 +190,7 @@ async def run_program(dut):
     cocotb.start_soon(Clock(dut.clk_i, 1, units="ns").start())
     cocotb.start_soon(memory_sim(dut, "I", "instr"))
     cocotb.start_soon(clint(dut, "CLINT", False))
+    cocotb.start_soon(memory_sim_write_rtosunit(dut, True))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
 
     # reset core

@@ -82,7 +82,6 @@ logic RDY_mem_rd_addr_u_to_c;                   // RDY_mem_rd_addr
 
 // Memory Read Data Logic
 logic EN_mem_rd_data_c_to_u;                    // EN_mem_rd_data
-logic RDY_mem_rd_data_u_to_c;                   // RDY_mem_rd_data
 logic [31:0] mem_rd_data_d_c_to_u;              // mem_rd_data_d
 
 // Mstatus and Mepc Logic
@@ -232,7 +231,6 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     // Memory Read Data Logic
     .mem_rd_data_d              (mem_rd_data_d_c_to_u),     // mem_rd_data_d
     .EN_mem_rd_data             (EN_mem_rd_data_c_to_u),    // EN_mem_rd_data
-    .RDY_mem_rd_data            (RDY_mem_rd_data_u_to_c),   // RDY_mem_rd_data
 
     // Mstatus and Mepc Logic
     .mstatus_out                (mstatus_out_u_to_c),       // mstatus_out

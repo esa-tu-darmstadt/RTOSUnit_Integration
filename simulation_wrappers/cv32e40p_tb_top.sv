@@ -25,6 +25,12 @@ module cv32e40p_tb_top (
     output logic [31:0] ctx_mem_wr_addr_o,
     output logic [31:0] ctx_mem_wr_data_o,
 
+    output logic ctx_mem_rd_rq_valid_o,
+    output logic [31:0] ctx_mem_rd_rq_addr_o,
+
+    input logic ctx_mem_rd_resp_valid_i,
+    input logic [31:0] ctx_mem_rd_data_i,
+
     // Data memory interface
     output logic        data_req_o,
     input  logic        data_gnt_i,
@@ -76,13 +82,7 @@ logic [63:0] mem_wr_u_to_c;                     // mem_wr
 logic RDY_mem_wr_u_to_c;                        // RDY_mem_wr
 
 // Memory Read Address Logic
-logic EN_mem_rd_addr_c_to_u;                    // EN_mem_rd_addr
-logic [31:0] mem_rd_addr_u_to_c;                // mem_rd_addr
 logic RDY_mem_rd_addr_u_to_c;                   // RDY_mem_rd_addr
-
-// Memory Read Data Logic
-logic EN_mem_rd_data_c_to_u;                    // EN_mem_rd_data
-logic [31:0] mem_rd_data_d_c_to_u;              // mem_rd_data_d
 
 // Mstatus and Mepc Logic
 logic [31:0] mstatus_out_u_to_c;                // mstatus_out
@@ -115,10 +115,11 @@ logic [32:0] custom_inst_u_to_c;                // custom_inst
 logic RDY_custom_inst_u_to_c;                   // RDY_custom_inst
 
 // memory bus arbitration
-assign EN_mem_wr_c_to_u = ~data_req_o;
-assign ctx_mem_wr_en_o = (~data_req_o) & RDY_mem_wr_u_to_c;
+assign EN_mem_wr_c_to_u = (~ctx_mem_rd_rq_valid_o) & ~data_req_o;
+assign ctx_mem_wr_en_o = (~ctx_mem_rd_rq_valid_o) & (~data_req_o) & RDY_mem_wr_u_to_c;
 assign ctx_mem_wr_addr_o = mem_wr_u_to_c[63:32];
 assign ctx_mem_wr_data_o = mem_wr_u_to_c[31:0];
+assign ctx_mem_rd_rq_valid_o = (~data_req_o) & RDY_mem_rd_addr_u_to_c;
 
 
 cv32e40p_top #(
@@ -224,13 +225,13 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_mem_wr                 (RDY_mem_wr_u_to_c),        // RDY_mem_wr
 
     // Memory Read Address Logic
-    .EN_mem_rd_addr             (EN_mem_rd_addr_c_to_u),    // EN_mem_rd_addr
-    .mem_rd_addr                (mem_rd_addr_u_to_c),       // mem_rd_addr
+    .EN_mem_rd_addr             (ctx_mem_rd_rq_valid_o),    // EN_mem_rd_addr
+    .mem_rd_addr                (ctx_mem_rd_rq_addr_o),       // mem_rd_addr
     .RDY_mem_rd_addr            (RDY_mem_rd_addr_u_to_c),   // RDY_mem_rd_addr
 
     // Memory Read Data Logic
-    .mem_rd_data_d              (mem_rd_data_d_c_to_u),     // mem_rd_data_d
-    .EN_mem_rd_data             (EN_mem_rd_data_c_to_u),    // EN_mem_rd_data
+    .mem_rd_data_d              (ctx_mem_rd_resp_valid_i),     // mem_rd_data_d
+    .EN_mem_rd_data             (ctx_mem_rd_data_i),    // EN_mem_rd_data
 
     // Mstatus and Mepc Logic
     .mstatus_out                (mstatus_out_u_to_c),       // mstatus_out

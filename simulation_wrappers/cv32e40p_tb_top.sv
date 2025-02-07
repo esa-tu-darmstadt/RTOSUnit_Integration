@@ -20,6 +20,11 @@ module cv32e40p_tb_top (
     output logic [31:0] instr_addr_o,
     input  logic [31:0] instr_rdata_i,
 
+    // rtos unit memory iface
+    output logic        ctx_mem_wr_en_o,
+    output logic [31:0] ctx_mem_wr_addr_o,
+    output logic [31:0] ctx_mem_wr_data_o,
+
     // Data memory interface
     output logic        data_req_o,
     input  logic        data_gnt_i,
@@ -48,9 +53,8 @@ module cv32e40p_tb_top (
 
 
 // Register Read Logic
-logic [4:0] reg_read_addr_cold_c_to_u;          // reg_read_addr_cold
+logic [4:0] reg_read_addr_cold_u_to_c;          // reg_read_addr_cold
 logic [31:0] reg_read_data_cold_data_c_to_u;    // reg_read_data_cold_data
-logic EN_reg_read_data_cold_c_to_u;             // EN_reg_read_data_cold
 
 // Register Write Logic
 logic EN_reg_write_cold_c_to_u;                 // EN_reg_write_cold
@@ -110,6 +114,12 @@ logic [31:0] custom_inst_prio_c_to_u;           // custom_inst_prio
 logic EN_custom_inst_c_to_u;                    // EN_custom_inst
 logic [32:0] custom_inst_u_to_c;                // custom_inst
 logic RDY_custom_inst_u_to_c;                   // RDY_custom_inst
+
+// memory bus arbitration
+assign EN_mem_wr_c_to_u = ~data_req_o;
+assign ctx_mem_wr_en_o = (~data_req_o) & RDY_mem_wr_u_to_c;
+assign ctx_mem_wr_addr_o = mem_wr_u_to_c[63:32];
+assign ctx_mem_wr_data_o = mem_wr_u_to_c[31:0];
 
 
 cv32e40p_top #(
@@ -173,7 +183,17 @@ cv32e40p_top #(
     .ctx_rs2_prio_o(custom_inst_prio_c_to_u),
     .ctx_rd_write_data_i(custom_inst_u_to_c),
     .ctx_mret_o(EN_mret_c_to_u),
-    .ctx_trap_o(EN_trap_c_to_u)
+    .ctx_trap_o(EN_trap_c_to_u),
+
+    // ctx reg access
+    .reg_read_addr_cold_i(reg_read_addr_cold_u_to_c),
+    .reg_read_data_cold_data_o(reg_read_data_cold_data_c_to_u),
+
+    // ctx stuff
+    .ctx_mcause_o(trap_mcause_c_to_u),
+    .ctx_mstatus_o(trap_mstatus_c_to_u),
+    .ctx_mepc_o(trap_mepc_c_to_u),
+    .ctx_switch_bank_i(switch_bank_o_u_to_c)
 );
 
 // Instantiate mkRTOSUnitSynth
@@ -182,9 +202,8 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RST_N                      (rst_ni),                    // Reset input
 
     // Register Read Logic
-    .reg_read_addr_cold         (reg_read_addr_cold_c_to_u), // reg_read_addr_cold
+    .reg_read_addr_cold         (reg_read_addr_cold_u_to_c), // reg_read_addr_cold
     .reg_read_data_cold_data    (reg_read_data_cold_data_c_to_u), // reg_read_data_cold_data
-    .EN_reg_read_data_cold      (EN_reg_read_data_cold_c_to_u), // EN_reg_read_data_cold
 
     // Register Write Logic
     .EN_reg_write_cold          (EN_reg_write_cold_c_to_u), // EN_reg_write_cold

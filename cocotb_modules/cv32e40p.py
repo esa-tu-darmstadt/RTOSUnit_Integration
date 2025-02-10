@@ -13,6 +13,9 @@ no_bytes = int(len(mem_bin))
 for i in range(no_bytes):
     memory[i] = int(mem_bin[i])
 
+async def flush(dut):
+    await Edge(dut.clk_i)
+    sys.stdout.flush()
 
 async def reset_dut(reset_n, duration_ns):
     reset_n.value = 0

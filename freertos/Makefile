@@ -99,6 +99,7 @@ $(BUILD_DIR)/RTOSDemo$(XLEN).dump: $(BUILD_DIR)/RTOSDemo$(XLEN).axf
 
 $(BUILD_DIR)/RTOSDemo$(XLEN).bin: $(BUILD_DIR)/RTOSDemo$(XLEN).axf
 	$(OBJCOPY) -O binary $^ $@
+	truncate -s 1048576 $@
 
 $(BUILD_DIR)/RTOSDemo$(XLEN).axf: $(OBJS) Makefile
 	$(CC) $(LDFLAGS) $(OBJS) -Tfake_rom.lds -o $@

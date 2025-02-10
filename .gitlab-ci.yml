@@ -16,6 +16,7 @@ test_cv32e40p:
   stage: test
   timeout: 5h
   script:
+    - git submodule update --init
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py
     - popd

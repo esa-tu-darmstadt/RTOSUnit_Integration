@@ -221,8 +221,8 @@ async def run_program(dut):
     cocotb.start_soon(Clock(dut.clk_i, 1, units="ns").start())
     cocotb.start_soon(memory_sim(dut, "I", "instr"))
     cocotb.start_soon(clint(dut, "CLINT", False))
-    cocotb.start_soon(memory_sim_write_rtosunit(dut, True))
-    cocotb.start_soon(memory_sim_read_rtosunit(dut, True))
+    cocotb.start_soon(memory_sim_write_rtosunit(dut, False))
+    cocotb.start_soon(memory_sim_read_rtosunit(dut, False))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
 
     # reset core

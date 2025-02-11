@@ -112,11 +112,18 @@ test_piccolo:
 collect_results:
   stage: eval
   script:
+    - echo hi
+  artifacts:
+    paths:
+    - log/*
+
+plot_figs:
+  stage: eval
+  script:
     - apt-get -y update
     - apt-get -y install pip
     - pip install --break-system-packages pandas matplotlib seaborn
     - python3 util/plot_logs.py
   artifacts:
     paths:
-    - log/*
     - ./*.png

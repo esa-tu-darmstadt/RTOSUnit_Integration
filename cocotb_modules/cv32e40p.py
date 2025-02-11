@@ -199,6 +199,12 @@ async def clint(dut, dbg_name, dbg = False):
         mtime = new_mtime & 0xffffffff
         mtime_h = (new_mtime >> 32) & 0xffffffff
 
+async def check_assertions(dut):
+    await ReadOnly()
+    if dut.u_core.core_i.cs_registers_i.ctx_mcause_o.value not in [0xb, 0x17, 0x0]:
+        print("ERROR: invalid MCAUSE register value!")
+        exit(-1)
+
 @cocotb.test()
 async def run_program(dut):
     """Run binary."""
@@ -224,6 +230,7 @@ async def run_program(dut):
     cocotb.start_soon(clint(dut, "CLINT", False))
     cocotb.start_soon(memory_sim_write_rtosunit(dut, False))
     cocotb.start_soon(memory_sim_read_rtosunit(dut, False))
+    cocotb.start_soon(check_assertions(dut))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
 
     # reset core

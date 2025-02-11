@@ -66,7 +66,8 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
                                 print("got return")
                                 return
                             else:
-                                print("UNKNOWN ADDRESS")
+                                if dbg:
+                                    print("UNKNOWN ADDRESS")
         else:
             next_vld = False
         await RisingEdge(dut.clk_i)
@@ -76,7 +77,6 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
             if not we and vld_addr:
                 exec(f"dut.{obi_prefix}_rdata_i.value = next_r")
                 if dbg:
-                    #print(f"{dbg_name} read response: {hex(next_r)}")
                     sys.stdout.flush()
         else:
             exec(f"dut.{obi_prefix}_rvalid_i.value = 0")
@@ -107,7 +107,8 @@ async def memory_sim_write_rtosunit(dut, dbg = False):
                 try:
                     memory[addr_w] = data_w[i]
                 except:
-                    print("UNKNOWN ADDRESS")
+                    if dbg:
+                        print("UNKNOWN ADDRESS")
 
 
 

@@ -63,7 +63,6 @@ logic [4:0] reg_read_addr_cold_u_to_c;          // reg_read_addr_cold
 logic [31:0] reg_read_data_cold_data_c_to_u;    // reg_read_data_cold_data
 
 // Register Write Logic
-logic EN_reg_write_cold_c_to_u;                 // EN_reg_write_cold
 logic [36:0] reg_write_cold_u_to_c;             // reg_write_cold
 logic RDY_reg_write_cold_u_to_c;                // RDY_reg_write_cold
 
@@ -121,6 +120,11 @@ assign ctx_mem_wr_addr_o = mem_wr_u_to_c[63:32];
 assign ctx_mem_wr_data_o = mem_wr_u_to_c[31:0];
 assign ctx_mem_rd_rq_valid_o = (~data_req_o) & RDY_mem_rd_addr_u_to_c;
 
+// write request separation
+logic [4:0] reg_write_cold_addr;
+logic [31:0] reg_write_cold_data;
+assign reg_write_cold_addr = reg_write_cold_u_to_c[36:32];
+assign reg_write_cold_data = reg_write_cold_u_to_c[31:0];
 
 cv32e40p_top #(
     .FPU                      ( 0 ),
@@ -189,11 +193,21 @@ cv32e40p_top #(
     .reg_read_addr_cold_i(reg_read_addr_cold_u_to_c),
     .reg_read_data_cold_data_o(reg_read_data_cold_data_c_to_u),
 
+    .reg_write_addr_cold_i(reg_write_cold_addr),
+    .reg_write_data_cold_data_i(reg_write_cold_data),
+    .reg_write_we_cold_i(RDY_reg_write_cold_u_to_c),
+
     // ctx stuff
     .ctx_mcause_o(trap_mcause_c_to_u),
     .ctx_mstatus_o(trap_mstatus_c_to_u),
     .ctx_mepc_o(trap_mepc_c_to_u),
-    .ctx_switch_bank_i(switch_bank_o_u_to_c)
+    .ctx_switch_bank_i(switch_bank_o_u_to_c),
+
+    .ctx_csr_wr_we_i(write_csrs_u_to_c),
+    .ctx_csr_wr_mepc_i(mepc_out_u_to_c),
+    .ctx_csr_wr_mstatus_i(mstatus_out_u_to_c),
+
+    .ctx_stall_mret_i(~RDY_mret_u_to_c)
 );
 
 // Instantiate mkRTOSUnitSynth
@@ -206,7 +220,7 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .reg_read_data_cold_data    (reg_read_data_cold_data_c_to_u), // reg_read_data_cold_data
 
     // Register Write Logic
-    .EN_reg_write_cold          (EN_reg_write_cold_c_to_u), // EN_reg_write_cold
+    .EN_reg_write_cold          (RDY_reg_write_cold_u_to_c), // EN_reg_write_cold
     .reg_write_cold             (reg_write_cold_u_to_c),    // reg_write_cold
     .RDY_reg_write_cold         (RDY_reg_write_cold_u_to_c), // RDY_reg_write_cold
 
@@ -230,8 +244,8 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_mem_rd_addr            (RDY_mem_rd_addr_u_to_c),   // RDY_mem_rd_addr
 
     // Memory Read Data Logic
-    .mem_rd_data_d              (ctx_mem_rd_resp_valid_i),     // mem_rd_data_d
-    .EN_mem_rd_data             (ctx_mem_rd_data_i),    // EN_mem_rd_data
+    .mem_rd_data_d              (ctx_mem_rd_data_i),     // mem_rd_data_d
+    .EN_mem_rd_data             (ctx_mem_rd_resp_valid_i),    // EN_mem_rd_data
 
     // Mstatus and Mepc Logic
     .mstatus_out                (mstatus_out_u_to_c),       // mstatus_out

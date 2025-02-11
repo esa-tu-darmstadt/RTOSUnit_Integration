@@ -46,6 +46,7 @@ VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/include
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/../bhv
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/../bhv/include
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cv32e40p/rtl/../sva
+VERILOG_INCLUDE_DIRS += /opt/cad/bluespec/latest/lib/Verilog/
 # use VHDL_SOURCES for VHDL files
 
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file

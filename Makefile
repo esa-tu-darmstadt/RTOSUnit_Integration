@@ -9,7 +9,7 @@ clean:
 
 .PHONY: piccolo
 piccolo: freertos
-	cd RTOSUnit && make
+	cd RTOSUnit && PICCOLO=1 make
 
 .PHONY: ctxunit
 ctxunit:

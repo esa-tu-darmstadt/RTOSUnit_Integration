@@ -9,11 +9,11 @@ clean:
 
 .PHONY: piccolo
 piccolo: freertos
-	cd RTOSUnit && PICCOLO=1 make
+	cd RTOSUnit && CPU_WRITE_PORTS=1 PICCOLO=1 make
 
 .PHONY: ctxunit
 ctxunit:
-	cd RTOSUnit && TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG compile_top
+	cd RTOSUnit && CPU_WRITE_PORTS=2 TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG compile_top
 
 .PHONY: cv32e40p
 cv32e40p: freertos ctxunit

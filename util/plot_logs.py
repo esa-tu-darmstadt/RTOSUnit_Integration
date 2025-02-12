@@ -26,7 +26,7 @@ def plot(df, name):
 
     plt.xticks(rotation=15, ha='right')
     plt.tight_layout()
-    plt.savefig(f"{name}.png", dpi=600)
+    plt.savefig(f"{name}.png", dpi=300)
     plt.close()
 
 

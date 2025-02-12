@@ -72,8 +72,7 @@ logic [927:0] cold_regs_w_u_to_c;               // cold_regs_w
 logic RDY_cold_regs_w_u_to_c;                   // RDY_cold_regs_w
 
 // Hot Register Write Logic
-logic [4:0] reg_hot_write_trace_addr_c_to_u;    // reg_hot_write_trace_addr
-logic EN_reg_hot_write_trace_c_to_u;            // EN_reg_hot_write_trace
+logic [11:0] reg_hot_write_trace_addrs_c_to_u;    // reg_hot_write_trace_addr
 
 // Memory Write Logic
 logic EN_mem_wr_c_to_u;                         // EN_mem_wr
@@ -207,7 +206,9 @@ cv32e40p_top #(
     .ctx_csr_wr_mepc_i(mepc_out_u_to_c),
     .ctx_csr_wr_mstatus_i(mstatus_out_u_to_c),
 
-    .ctx_stall_mret_i(~RDY_mret_u_to_c)
+    .ctx_stall_mret_i(~RDY_mret_u_to_c),
+
+    .ctx_reg_hot_write_trace_o(reg_hot_write_trace_addrs_c_to_u)
 );
 
 // Instantiate mkRTOSUnitSynth
@@ -230,8 +231,7 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_cold_regs_w            (RDY_cold_regs_w_u_to_c),   // RDY_cold_regs_w
 
     // Hot Register Write Logic
-    .reg_hot_write_trace_addr   (reg_hot_write_trace_addr_c_to_u), // reg_hot_write_trace_addr
-    .EN_reg_hot_write_trace     (EN_reg_hot_write_trace_c_to_u), // EN_reg_hot_write_trace
+    .reg_hot_write_trace_addrs   (reg_hot_write_trace_addrs_c_to_u), // reg_hot_write_trace_addr
 
     // Memory Write Logic
     .EN_mem_wr                  (EN_mem_wr_c_to_u),         // EN_mem_wr

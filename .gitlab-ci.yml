@@ -104,7 +104,7 @@ test_piccolo:
       - LOAD: HW
         STORE: HW
         SCHED: HW
-        LATCH: [LD, ST, BOTH]
+        LATCH: [ST]
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
         CORE: [piccolo]

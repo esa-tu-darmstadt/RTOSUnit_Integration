@@ -68,8 +68,6 @@ logic RDY_reg_write_cold_u_to_c;                // RDY_reg_write_cold
 
 // Cold Registers Logic
 logic [927:0] cold_regs_in_c_to_u;              // cold_regs_in
-logic [927:0] cold_regs_w_u_to_c;               // cold_regs_w
-logic RDY_cold_regs_w_u_to_c;                   // RDY_cold_regs_w
 
 // Hot Register Write Logic
 logic [11:0] reg_hot_write_trace_addrs_c_to_u;    // reg_hot_write_trace_addr
@@ -113,7 +111,7 @@ logic [32:0] custom_inst_u_to_c;                // custom_inst
 logic RDY_custom_inst_u_to_c;                   // RDY_custom_inst
 
 // memory bus arbitration
-assign EN_mem_wr_c_to_u = (~ctx_mem_rd_rq_valid_o) & ~data_req_o;
+assign EN_mem_wr_c_to_u = (~ctx_mem_rd_rq_valid_o) & ~data_req_o & RDY_mem_wr_u_to_c;
 assign ctx_mem_wr_en_o = (~data_req_o) & RDY_mem_wr_u_to_c;
 assign ctx_mem_wr_addr_o = mem_wr_u_to_c[63:32];
 assign ctx_mem_wr_data_o = mem_wr_u_to_c[31:0];
@@ -227,8 +225,6 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
 
     // Cold Registers Logic
     .cold_regs_in               (cold_regs_in_c_to_u),      // cold_regs_in
-    .cold_regs_w                (cold_regs_w_u_to_c),       // cold_regs_w
-    .RDY_cold_regs_w            (RDY_cold_regs_w_u_to_c),   // RDY_cold_regs_w
 
     // Hot Register Write Logic
     .reg_hot_write_trace_addrs   (reg_hot_write_trace_addrs_c_to_u), // reg_hot_write_trace_addr

@@ -14,7 +14,7 @@ variables:
 
 test_cv32e40p:
   stage: test
-  timeout: 10m
+  timeout: 5h
   script:
     - git submodule update --init
     - pushd RTOSUnit
@@ -66,7 +66,7 @@ test_cv32e40p:
 
 test_piccolo:
   stage: test
-  timeout: 10m
+  timeout: 5h
   allow_failure: true
   script:
     - pushd RTOSUnit

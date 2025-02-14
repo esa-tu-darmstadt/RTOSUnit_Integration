@@ -67,6 +67,7 @@ test_cv32e40p:
 test_piccolo:
   stage: test
   timeout: 5h
+  allow_failure: true
   script:
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py

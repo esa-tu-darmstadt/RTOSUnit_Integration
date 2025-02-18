@@ -44,6 +44,8 @@ RTOS_SOURCE_DIR = $(abspath ./FreeRTOS-Kernel)
 RTOS_BENCH_DIR = $(abspath ./RTOSBench)
 RTOS_SUPPORT_DIR = $(abspath ./bench_support)
 
+CTX_BASE ?= f0000
+
 CPPFLAGS = \
 	-DportasmHANDLE_INTERRUPT=handle_trap \
 	-I . -I ../Common/include \
@@ -59,7 +61,8 @@ CFLAGS  += -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-fno-builtin-printf \
 	-fno-zero-initialized-in-bss \
 	-D NB_ITER=20 \
-	-D NB_WORKLOAD_TASK=2
+	-D NB_WORKLOAD_TASK=2 \
+	-D CTX_BASE=0x$(CTX_BASE)
 LDFLAGS = -nostartfiles \
 	-march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-Xlinker --gc-sections \

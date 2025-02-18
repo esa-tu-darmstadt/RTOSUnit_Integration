@@ -58,7 +58,8 @@ CFLAGS  += -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-fdata-sections \
 	-fno-builtin-printf \
 	-fno-zero-initialized-in-bss \
-	-D NB_ITER=20
+	-D NB_ITER=20 \
+	-D NB_WORKLOAD_TASK=2
 LDFLAGS = -nostartfiles \
 	-march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-Xlinker --gc-sections \

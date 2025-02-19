@@ -115,7 +115,7 @@ assign EN_mem_wr_c_to_u = (~ctx_mem_rd_rq_valid_o) & ~data_req_o & RDY_mem_wr_u_
 assign ctx_mem_wr_en_o = (~data_req_o) & RDY_mem_wr_u_to_c;
 assign ctx_mem_wr_addr_o = mem_wr_u_to_c[63:32];
 assign ctx_mem_wr_data_o = mem_wr_u_to_c[31:0];
-assign ctx_mem_rd_rq_valid_o = (~data_req_o) & RDY_mem_rd_addr_u_to_c & (~ctx_mem_wr_en_o);
+assign ctx_mem_rd_rq_valid_o = (~data_req_o) & RDY_mem_rd_addr_u_to_c;
 
 // write request separation
 logic [4:0] reg_write_cold_addr;

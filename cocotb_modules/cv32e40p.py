@@ -180,6 +180,10 @@ async def clint(dut, dbg_name, dbg = False):
                 elif addr == 0x40004004:
                     mtimecmp_h = dut.data_wdata_o.value
 
+
+        if os.environ.get('SCHED') == "HW" and dut.u_core.ctx_trap_o.value == 1 and  dut.u_core.ctx_mcause_o == 0x80000007:
+            mtime = 0
+            mtime_h = 0
             
         await RisingEdge(dut.clk_i)
         # write data

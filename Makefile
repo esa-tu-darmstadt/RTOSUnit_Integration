@@ -13,7 +13,7 @@ piccolo: freertos
 
 .PHONY: ctxunit
 ctxunit:
-	cd RTOSUnit && CPU_WRITE_PORTS=2 TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG compile_top
+	cd RTOSUnit && CV32E40P=1 CPU_WRITE_PORTS=2 TOP_MODULE=mkRTOSUnitSynth MAIN_MODULE=RTOSUnit make SIM_TYPE=VERILOG compile_top
 
 .PHONY: cv32e40p
 cv32e40p: freertos ctxunit

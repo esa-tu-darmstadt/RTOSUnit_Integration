@@ -20,17 +20,6 @@ module cv32e40p_tb_top (
     output logic [31:0] instr_addr_o,
     input  logic [31:0] instr_rdata_i,
 
-    // rtos unit memory iface
-    output logic        ctx_mem_wr_en_o,
-    output logic [31:0] ctx_mem_wr_addr_o,
-    output logic [31:0] ctx_mem_wr_data_o,
-
-    output logic ctx_mem_rd_rq_valid_o,
-    output logic [31:0] ctx_mem_rd_rq_addr_o,
-
-    input logic ctx_mem_rd_resp_valid_i,
-    input logic [31:0] ctx_mem_rd_data_i,
-
     // Data memory interface
     output logic        data_req_o,
     input  logic        data_gnt_i,
@@ -111,11 +100,75 @@ logic [32:0] custom_inst_u_to_c;                // custom_inst
 logic RDY_custom_inst_u_to_c;                   // RDY_custom_inst
 
 // memory bus arbitration
-assign EN_mem_wr_c_to_u = (~ctx_mem_rd_rq_valid_o) & ~data_req_o & RDY_mem_wr_u_to_c;
-assign ctx_mem_wr_en_o = (~data_req_o) & RDY_mem_wr_u_to_c;
-assign ctx_mem_wr_addr_o = mem_wr_u_to_c[63:32];
-assign ctx_mem_wr_data_o = mem_wr_u_to_c[31:0];
-assign ctx_mem_rd_rq_valid_o = (~data_req_o) & RDY_mem_rd_addr_u_to_c;
+logic        data_req_c;
+logic        data_gnt_c;
+logic        data_rvalid_c;
+logic        data_we_c;
+logic [ 3:0] data_be_c;
+logic [31:0] data_addr_c;
+logic [31:0] data_wdata_c;
+logic [31:0] data_rdata_c;
+
+assign data_gnt_c = data_gnt_i;
+
+// internal signals for RTOSUnit memory iface
+logic        ctx_mem_wr_en;
+logic [31:0] ctx_mem_wr_addr;
+logic [31:0] ctx_mem_wr_data;
+logic ctx_mem_rd_rq_valid;
+logic [31:0] ctx_mem_rd_rq_addr;
+
+// request source tracking
+logic [1:0] rq_ptr;
+logic [1:0] rs_ptr;
+logic [2:0] src_arr [3:0];
+
+logic ctx_mem_rd_resp_valid;
+logic [31:0] ctx_mem_rd_data;
+
+// store source of a request
+always_ff @(posedge clk_i) begin
+    if (!rst_ni) begin
+        rq_ptr <= 0;
+        rs_ptr <= 0;
+    end else begin
+        src_arr[rq_ptr] <= {data_req_c, ctx_mem_wr_en, ctx_mem_rd_rq_valid};
+        if (data_req_c | ctx_mem_wr_en |ctx_mem_rd_rq_valid) begin
+            rq_ptr <= rq_ptr + 1;
+        end
+    end
+end
+
+// distribute incoming reads
+always_comb begin
+    data_rdata_c = data_rdata_i;
+    ctx_mem_rd_data = data_rdata_i;
+
+    data_rvalid_c         = data_rvalid_i & src_arr[rs_ptr][2];
+    ctx_mem_rd_resp_valid = data_rvalid_i & src_arr[rs_ptr][0];
+end
+
+// advance response destination pointer
+always_ff @(posedge clk_i) begin
+    if (rst_ni && data_rvalid_i) rs_ptr <= rs_ptr + 1;
+end
+
+// build output signals for memory bus
+always_comb begin
+    data_req_o = data_req_c | ctx_mem_wr_en | ctx_mem_rd_rq_valid;
+
+    data_we_o    = data_req_c ?   data_we_c  : ctx_mem_wr_en;
+    data_be_o    = data_req_c ?   data_be_c  : 'hf;
+    data_addr_o  = data_req_c ? data_addr_c  : (ctx_mem_wr_en ? ctx_mem_wr_addr : ctx_mem_rd_rq_addr);
+    data_wdata_o = data_req_c ? data_wdata_c : ctx_mem_wr_data;
+end
+
+// arbitrate memory bus between CPU and RTOSUNIT
+assign ctx_mem_wr_en =       EN_mem_wr_c_to_u;
+assign EN_mem_wr_c_to_u =      ~data_req_c & RDY_mem_wr_u_to_c;
+assign ctx_mem_rd_rq_valid =   ~data_req_c & RDY_mem_rd_addr_u_to_c;
+assign ctx_mem_wr_addr = mem_wr_u_to_c[63:32];
+assign ctx_mem_wr_data = mem_wr_u_to_c[31:0];
 
 // write request separation
 logic [4:0] reg_write_cold_addr;
@@ -157,14 +210,14 @@ cv32e40p_top #(
     .instr_rdata_i            (instr_rdata_i),
 
     // Data memory interface
-    .data_addr_o              (data_addr_o),
-    .data_req_o               (data_req_o),
-    .data_gnt_i               (data_gnt_i),
-    .data_we_o                (data_we_o),
-    .data_be_o                (data_be_o),
-    .data_wdata_o             (data_wdata_o),
-    .data_rvalid_i            (data_rvalid_i),
-    .data_rdata_i             (data_rdata_i),
+    .data_addr_o              (data_addr_c),
+    .data_req_o               (data_req_c),
+    .data_gnt_i               (data_gnt_c),
+    .data_we_o                (data_we_c),
+    .data_be_o                (data_be_c),
+    .data_wdata_o             (data_wdata_c),
+    .data_rvalid_i            (data_rvalid_c),
+    .data_rdata_i             (data_rdata_c),
 
      // Interrupt interface
     .irq_i                    (irq_i),
@@ -235,13 +288,13 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_mem_wr                 (RDY_mem_wr_u_to_c),        // RDY_mem_wr
 
     // Memory Read Address Logic
-    .EN_mem_rd_addr             (ctx_mem_rd_rq_valid_o),    // EN_mem_rd_addr
-    .mem_rd_addr                (ctx_mem_rd_rq_addr_o),       // mem_rd_addr
+    .EN_mem_rd_addr             (ctx_mem_rd_rq_valid),    // EN_mem_rd_addr
+    .mem_rd_addr                (ctx_mem_rd_rq_addr),       // mem_rd_addr
     .RDY_mem_rd_addr            (RDY_mem_rd_addr_u_to_c),   // RDY_mem_rd_addr
 
     // Memory Read Data Logic
-    .mem_rd_data_d              (ctx_mem_rd_data_i),     // mem_rd_data_d
-    .EN_mem_rd_data             (ctx_mem_rd_resp_valid_i),    // EN_mem_rd_data
+    .mem_rd_data_d              (ctx_mem_rd_data),     // mem_rd_data_d
+    .EN_mem_rd_data             (ctx_mem_rd_resp_valid),    // EN_mem_rd_data
 
     // Mstatus and Mepc Logic
     .mstatus_out                (mstatus_out_u_to_c),       // mstatus_out

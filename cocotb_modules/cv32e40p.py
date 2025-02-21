@@ -81,66 +81,6 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
         else:
             exec(f"dut.{obi_prefix}_rvalid_i.value = 0")
 
-
-
-async def memory_sim_write_rtosunit(dut, dbg = False):
-    while True:
-        await FallingEdge(dut.clk_i)
-        # check WE if available
-        ena = dut.ctx_mem_wr_en_o.value
-        data_ctx_w = dut.ctx_mem_wr_data_o.value
-        addr_ctx_w = dut.ctx_mem_wr_addr_o.value
-        
-        # assert that this cannot happen at the same time as a mem access from core
-        if ena == 1 and ( dut.data_req_o.value == 1 or dut.ctx_mem_rd_rq_valid_o.value == 1):
-            print("ERROR: Context unit write access during CPU memory access or context unit read. Abort!")
-            exit(-1)
-
-        # elapsing writes
-        if ena == 1:
-            if dbg:
-                print(f"RTOSUnit write: {hex(addr_ctx_w)} : {hex(data_ctx_w)}")
-
-            for i in range(4):
-                addr_w = addr_ctx_w + i
-                data_w = int(data_ctx_w).to_bytes(4, byteorder = 'little')
-                try:
-                    memory[addr_w] = data_w[i]
-                except:
-                    if dbg:
-                        print("UNKNOWN ADDRESS")
-
-
-
-async def memory_sim_read_rtosunit(dut, dbg = False):
-    while True:
-        await FallingEdge(dut.clk_i)
-        ena = dut.ctx_mem_rd_rq_valid_o.value
-        addr = dut.ctx_mem_rd_rq_addr_o.value
-
-        # assert that this cannot happen at the same time as a mem access from core
-        if ena == 1 and ( dut.data_req_o.value == 1 or dut.ctx_mem_wr_en_o.value == 1):
-            print("ERROR: Context unit read access during CPU memory access or context unit write. Abort!")
-            exit(-1)
-
-        if ena == 1:
-            nbl_0 = memory[addr]
-            nbl_1 = memory[addr+1]
-            nbl_2 = memory[addr+2]
-            nbl_3 = memory[addr+3]
-            next_r = nbl_0 + (nbl_1<<8) + (nbl_2<<16) + (nbl_3<<24)
-            if dbg:
-                print(f"RTOSUnit read: {hex(addr)} : {hex(next_r)}")
-
-        await RisingEdge(dut.clk_i)
-
-        if ena == 1:
-            dut.ctx_mem_rd_resp_valid_i.value = 1
-            dut.ctx_mem_rd_data_i.value = next_r
-        else:
-            dut.ctx_mem_rd_resp_valid_i.value = 0
-
-
 async def clint(dut, dbg_name, dbg = False):
 
     mtime = 0
@@ -232,8 +172,6 @@ async def run_program(dut):
     cocotb.start_soon(Clock(dut.clk_i, 1, units="ns").start())
     cocotb.start_soon(memory_sim(dut, "I", "instr"))
     cocotb.start_soon(clint(dut, "CLINT", False))
-    cocotb.start_soon(memory_sim_write_rtosunit(dut, False))
-    cocotb.start_soon(memory_sim_read_rtosunit(dut, False))
     cocotb.start_soon(check_assertions(dut))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
 

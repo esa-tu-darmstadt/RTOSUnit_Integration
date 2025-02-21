@@ -15,7 +15,7 @@ endif
 CFLAGS = 
 
 ifeq ($(SCHED),HW)
-	CFLAGS += -D HWSCHED
+	CFLAGS += -D HWSCHED -D HWSCHED_CLINT
 endif
 
 ifeq ($(LOAD),HW)

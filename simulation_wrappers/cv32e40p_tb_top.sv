@@ -46,6 +46,14 @@ module cv32e40p_tb_top (
     output logic core_sleep_o
 );
 
+// latch response from OBI
+logic        data_rvalid_d;
+logic [31:0] data_rdata_d;
+
+always_ff @(posedge clk_i) begin
+    data_rvalid_d <= data_rvalid_i;
+    data_rdata_d <= data_rdata_i;
+end
 
 // Register Read Logic
 logic [4:0] reg_read_addr_cold_u_to_c;          // reg_read_addr_cold
@@ -60,14 +68,6 @@ logic [927:0] cold_regs_in_c_to_u;              // cold_regs_in
 
 // Hot Register Write Logic
 logic [11:0] reg_hot_write_trace_addrs_c_to_u;    // reg_hot_write_trace_addr
-
-// Memory Write Logic
-logic EN_mem_wr_c_to_u;                         // EN_mem_wr
-logic [63:0] mem_wr_u_to_c;                     // mem_wr
-logic RDY_mem_wr_u_to_c;                        // RDY_mem_wr
-
-// Memory Read Address Logic
-logic RDY_mem_rd_addr_u_to_c;                   // RDY_mem_rd_addr
 
 // Mstatus and Mepc Logic
 logic [31:0] mstatus_out_u_to_c;                // mstatus_out
@@ -111,12 +111,15 @@ logic [31:0] data_rdata_c;
 
 assign data_gnt_c = data_gnt_i;
 
+logic [64:0] ctx_mem_access;
+logic        EN_ctx_mem_access;
+logic        RDY_ctx_mem_access;
+
 // internal signals for RTOSUnit memory iface
 logic        ctx_mem_wr_en;
-logic [31:0] ctx_mem_wr_addr;
+logic [31:0] ctx_mem_addr;
 logic [31:0] ctx_mem_wr_data;
 logic ctx_mem_rd_rq_valid;
-logic [31:0] ctx_mem_rd_rq_addr;
 
 // request source tracking
 logic [1:0] rq_ptr;
@@ -132,8 +135,8 @@ always_ff @(posedge clk_i) begin
         rq_ptr <= 0;
         rs_ptr <= 0;
     end else begin
-        src_arr[rq_ptr] <= {data_req_c, ctx_mem_wr_en, ctx_mem_rd_rq_valid};
-        if (data_req_c | ctx_mem_wr_en |ctx_mem_rd_rq_valid) begin
+        src_arr[rq_ptr] <= {data_req_c, ctx_mem_wr_en && EN_ctx_mem_access, EN_ctx_mem_access && ~ctx_mem_wr_en};
+        if (data_req_c | EN_ctx_mem_access) begin
             rq_ptr <= rq_ptr + 1;
         end
     end
@@ -141,34 +144,33 @@ end
 
 // distribute incoming reads
 always_comb begin
-    data_rdata_c = data_rdata_i;
-    ctx_mem_rd_data = data_rdata_i;
+    data_rdata_c = data_rdata_d;
+    ctx_mem_rd_data = data_rdata_d;
 
-    data_rvalid_c         = data_rvalid_i & src_arr[rs_ptr][2];
-    ctx_mem_rd_resp_valid = data_rvalid_i & src_arr[rs_ptr][0];
+    data_rvalid_c         = data_rvalid_d & src_arr[rs_ptr][2];
+    ctx_mem_rd_resp_valid = data_rvalid_d & src_arr[rs_ptr][0];
 end
 
 // advance response destination pointer
 always_ff @(posedge clk_i) begin
-    if (rst_ni && data_rvalid_i) rs_ptr <= rs_ptr + 1;
-end
-
-// build output signals for memory bus
-always_comb begin
-    data_req_o = data_req_c | ctx_mem_wr_en | ctx_mem_rd_rq_valid;
-
-    data_we_o    = data_req_c ?   data_we_c  : ctx_mem_wr_en;
-    data_be_o    = data_req_c ?   data_be_c  : 'hf;
-    data_addr_o  = data_req_c ? data_addr_c  : (ctx_mem_wr_en ? ctx_mem_wr_addr : ctx_mem_rd_rq_addr);
-    data_wdata_o = data_req_c ? data_wdata_c : ctx_mem_wr_data;
+    if (rst_ni && data_rvalid_d) rs_ptr <= rs_ptr + 1;
 end
 
 // arbitrate memory bus between CPU and RTOSUNIT
-assign ctx_mem_wr_en =       EN_mem_wr_c_to_u;
-assign EN_mem_wr_c_to_u =      ~data_req_c & RDY_mem_wr_u_to_c;
-assign ctx_mem_rd_rq_valid =   ~data_req_c & RDY_mem_rd_addr_u_to_c;
-assign ctx_mem_wr_addr = mem_wr_u_to_c[63:32];
-assign ctx_mem_wr_data = mem_wr_u_to_c[31:0];
+assign EN_ctx_mem_access = ~data_req_c & RDY_ctx_mem_access;
+assign ctx_mem_addr      = ctx_mem_access[64:33];
+assign ctx_mem_wr_data   = ctx_mem_access[32:1];
+assign ctx_mem_wr_en     = ctx_mem_access[0];
+
+// build output signals for memory bus
+always_comb begin
+    data_req_o   = data_req_c | EN_ctx_mem_access;
+
+    data_we_o    = data_req_c ?    data_we_c  :  ctx_mem_wr_en;
+    data_be_o    = data_req_c ?    data_be_c  :  'hf;
+    data_addr_o  = data_req_c ?  data_addr_c  :  ctx_mem_addr;
+    data_wdata_o = data_req_c ? data_wdata_c  :  ctx_mem_wr_data;
+end
 
 // write request separation
 logic [4:0] reg_write_cold_addr;
@@ -176,7 +178,7 @@ logic [31:0] reg_write_cold_data;
 assign reg_write_cold_addr = reg_write_cold_u_to_c[36:32];
 assign reg_write_cold_data = reg_write_cold_u_to_c[31:0];
 
-cv32e40p_top #(
+cv32e40p_core #(
     .FPU                      ( 0 ),
     .FPU_ADDMUL_LAT           ( 0 ),
     .FPU_OTHERS_LAT           ( 0 ),
@@ -259,7 +261,17 @@ cv32e40p_top #(
 
     .ctx_stall_mret_i(~RDY_mret_u_to_c),
 
-    .ctx_reg_hot_write_trace_o(reg_hot_write_trace_addrs_c_to_u)
+    .ctx_reg_hot_write_trace_o(reg_hot_write_trace_addrs_c_to_u),
+
+    .apu_busy_o    (),
+    .apu_req_o     (),
+    .apu_gnt_i     (0),
+    .apu_operands_o(),
+    .apu_op_o      (),
+    .apu_flags_o   (),
+    .apu_rvalid_i  (0),
+    .apu_result_i  (0),
+    .apu_flags_i   (0)
 );
 
 // Instantiate mkRTOSUnitSynth
@@ -283,18 +295,22 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .reg_hot_write_trace_addrs   (reg_hot_write_trace_addrs_c_to_u), // reg_hot_write_trace_addr
 
     // Memory Write Logic
-    .EN_mem_wr                  (EN_mem_wr_c_to_u),         // EN_mem_wr
+    /*.EN_mem_wr                  (EN_mem_wr_c_to_u),         // EN_mem_wr
     .mem_wr                     (mem_wr_u_to_c),            // mem_wr
-    .RDY_mem_wr                 (RDY_mem_wr_u_to_c),        // RDY_mem_wr
+    .RDY_mem_wr                 (RDY_mem_wr_u_to_c),        // RDY_mem_wr*/
 
-    // Memory Read Address Logic
+    /*// Memory Read Address Logic
     .EN_mem_rd_addr             (ctx_mem_rd_rq_valid),    // EN_mem_rd_addr
     .mem_rd_addr                (ctx_mem_rd_rq_addr),       // mem_rd_addr
-    .RDY_mem_rd_addr            (RDY_mem_rd_addr_u_to_c),   // RDY_mem_rd_addr
+    .RDY_mem_rd_addr            (RDY_mem_rd_addr_u_to_c),   // RDY_mem_rd_addr*/
 
     // Memory Read Data Logic
     .mem_rd_data_d              (ctx_mem_rd_data),     // mem_rd_data_d
     .EN_mem_rd_data             (ctx_mem_rd_resp_valid),    // EN_mem_rd_data
+
+    .mem_access                 (ctx_mem_access),
+    .EN_mem_access              (EN_ctx_mem_access),
+    .RDY_mem_access             (RDY_ctx_mem_access),
 
     // Mstatus and Mepc Logic
     .mstatus_out                (mstatus_out_u_to_c),       // mstatus_out

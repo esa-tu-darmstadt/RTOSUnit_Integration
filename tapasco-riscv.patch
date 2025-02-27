@@ -1,0 +1,252 @@
+diff --git a/Makefile b/Makefile
+index ebcdda4..117ad67 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,5 @@
+ SHELL=/bin/bash
+-BRAM_SIZE?=0x4000
++BRAM_SIZE?=0x80000
+ PYNQ=xc7z020clg400-1
+ XLEN?=32
+ CACHE?=false
+diff --git a/common/cpu_vlnv.tcl b/common/cpu_vlnv.tcl
+index b6c027f..071da70 100644
+--- a/common/cpu_vlnv.tcl
++++ b/common/cpu_vlnv.tcl
+@@ -12,4 +12,6 @@ set cpu_vlnv [list \
+   "cva6_pe"                     {openhwgroup:cva6:cva6:0.1} \
+   "swerv_eh2_pe"                {wdc:swerv_eh2:swerv_eh2:1.4} \
+   "cva5_pe"                     {openhwgroup:cva5:cva5} \
++  "cv32e40p_ctx_pe"             {core-v:core-v:CV32E40P} \
++  "cv32e40p_pe"                 {core-v:core-v:cv32e40p_vanilla} \
+ ]
+diff --git a/riscv/cv32e40p/package.tcl b/riscv/cv32e40p/package.tcl
+new file mode 100644
+index 0000000..82f5448
+--- /dev/null
++++ b/riscv/cv32e40p/package.tcl
+@@ -0,0 +1,64 @@
++set name "cv32e40p_vanilla"
++puts "package cv32e40p $name"
++set version 0.1
++
++create_project -force $name
++
++add_files ../../../cores/cv32e40p_vanilla/rtl/include/cv32e40p_apu_core_pkg.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/include/cv32e40p_fpu_pkg.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/include/cv32e40p_pkg.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_if_stage.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_cs_registers.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_register_file_ff.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_load_store_unit.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_id_stage.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_aligner.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_decoder.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_compressed_decoder.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_fifo.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_prefetch_buffer.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_hwloop_regs.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_mult.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_int_controller.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_ex_stage.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_alu_div.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_alu.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_ff_one.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_popcnt.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_apu_disp.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_controller.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_obi_interface.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_prefetch_controller.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_sleep_unit.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_core.sv
++
++add_files ../../../cores/cv32e40p_vanilla/rtl/cv32e40p_top.sv
++
++add_files ../../../cores/cv32e40p_vanilla/rtl/../bhv/cv32e40p_sim_clock_gate.sv
++add_files ../../../cores/cv32e40p_vanilla/rtl/../bhv/include/cv32e40p_tracer_pkg.sv
++
++add_files ../../../simulation_wrappers/cv32e40p_tb_top_axi_vanilla.sv
++
++
++update_compile_order -fileset sources_1
++
++set_property top cv32e40p_tb_top_axi [current_fileset]
++update_compile_order -fileset sources_1
++
++ipx::package_project -root_dir [pwd]/$name -import_files -force
++set core [ipx::current_core]
++set_property vendor core-v $core
++set_property library core-v $core
++set_property name $name $core
++set_property display_name $name $core
++set_property description $name $core
++set_property version $version $core
++set_property core_revision 1 $core
++
++ipx::create_xgui_files $core
++ipx::update_checksums $core
++ipx::save_core $core
++ipx::check_integrity $core
++
++ipx::archive_core core-v_risc-v_cv32e40p.zip $core
++ipx::unload_core component_1
+diff --git a/riscv/cv32e40p/setup.sh b/riscv/cv32e40p/setup.sh
+new file mode 100755
+index 0000000..6d64d56
+--- /dev/null
++++ b/riscv/cv32e40p/setup.sh
+@@ -0,0 +1,7 @@
++#!/bin/bash
++
++mkdir -p IP/riscv/
++cd riscv/cv32e40p
++
++vivado -nolog -nojournal -mode batch -source package.tcl
++unzip core-v_risc-v_cv32e40p -d ../../IP/riscv/cv32e40p/
+diff --git a/riscv/cv32e40p_ctx/package.tcl b/riscv/cv32e40p_ctx/package.tcl
+new file mode 100644
+index 0000000..ca3b145
+--- /dev/null
++++ b/riscv/cv32e40p_ctx/package.tcl
+@@ -0,0 +1,68 @@
++set name "CV32E40P"
++puts "package cv32e40p_ctx $name"
++set version 0.1
++
++create_project -force $name
++
++add_files ../../../cores/cv32e40p/rtl/include/cv32e40p_apu_core_pkg.sv
++add_files ../../../cores/cv32e40p/rtl/include/cv32e40p_fpu_pkg.sv
++add_files ../../../cores/cv32e40p/rtl/include/cv32e40p_pkg.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_if_stage.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_cs_registers.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_register_file_ff.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_register_file_multiplex.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_load_store_unit.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_id_stage.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_aligner.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_decoder.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_compressed_decoder.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_fifo.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_prefetch_buffer.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_hwloop_regs.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_mult.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_int_controller.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_ex_stage.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_alu_div.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_alu.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_ff_one.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_popcnt.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_apu_disp.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_controller.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_obi_interface.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_prefetch_controller.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_sleep_unit.sv
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_core.sv
++
++add_files ../../../cores/cv32e40p/rtl/cv32e40p_top.sv
++
++add_files ../../../cores/cv32e40p/rtl/../bhv/cv32e40p_sim_clock_gate.sv
++add_files ../../../cores/cv32e40p/rtl/../bhv/include/cv32e40p_tracer_pkg.sv
++
++add_files ../../../simulation_wrappers/cv32e40p_tb_top.sv
++add_files ../../../simulation_wrappers/cv32e40p_tb_top_axi.sv
++add_files ../../../RTOSUnit/build/verilog/mkRTOSUnitSynth.v
++
++add_files /scratch/ms/tools/bsc/inst/lib/Verilog/FIFO2.v
++
++update_compile_order -fileset sources_1
++
++set_property top cv32e40p_tb_top_axi [current_fileset]
++update_compile_order -fileset sources_1
++
++ipx::package_project -root_dir [pwd]/$name -import_files -force
++set core [ipx::current_core]
++set_property vendor core-v $core
++set_property library core-v $core
++set_property name $name $core
++set_property display_name $name $core
++set_property description $name $core
++set_property version $version $core
++set_property core_revision 1 $core
++
++ipx::create_xgui_files $core
++ipx::update_checksums $core
++ipx::save_core $core
++ipx::check_integrity $core
++
++ipx::archive_core core-v_risc-v_cv32e40p_ctx.zip $core
++ipx::unload_core component_1
+diff --git a/riscv/cv32e40p_ctx/setup.sh b/riscv/cv32e40p_ctx/setup.sh
+new file mode 100755
+index 0000000..795a6b2
+--- /dev/null
++++ b/riscv/cv32e40p_ctx/setup.sh
+@@ -0,0 +1,7 @@
++#!/bin/bash
++
++mkdir -p IP/riscv/
++cd riscv/cv32e40p_ctx
++
++vivado -nolog -nojournal -mode batch -source package.tcl
++unzip core-v_risc-v_cv32e40p_ctx -d ../../IP/riscv/cv32e40p_ctx/
+diff --git a/specific_tcl/cv32e40p_ctx_pe_project.tcl b/specific_tcl/cv32e40p_ctx_pe_project.tcl
+new file mode 100644
+index 0000000..455cd0d
+--- /dev/null
++++ b/specific_tcl/cv32e40p_ctx_pe_project.tcl
+@@ -0,0 +1,24 @@
++  # Create instance
++  set CV32E40P [ create_bd_cell -type ip -vlnv [dict get $cpu_vlnv $project_name] CV32E40P ]
++  set cpu_clk [get_bd_pins CV32E40P/clk_i]
++
++  # Create interface connections
++  set_property -dict [list CONFIG.AXI_PROTOCOL {AXI4LITE}] [get_bd_cells rv_imem_ctrl]
++  connect_bd_intf_net -intf_net CV32E40P_dbus [get_bd_intf_pins CV32E40P/m_axi_data] [get_bd_intf_pins axi_mem_intercon_1/S00_AXI]
++  set iaxi [get_bd_intf_pins CV32E40P/m_axi_instr]
++
++  # Create port connections
++  connect_bd_net -net RVController_0_rv_reset [get_bd_pins RVController_0/rv_reset] [get_bd_pins CV32E40P/rst_ni]
++  save_bd_design
++
++proc create_specific_addr_segs {} {
++  variable lmem
++  # Create address segments
++  create_bd_addr_seg -range 0x00010000 -offset 0x11000000 [get_bd_addr_spaces CV32E40P/m_axi_data] [get_bd_addr_segs RVController_0/saxi/reg0] SEG_RVController_0_reg0
++  create_bd_addr_seg -range $lmem -offset $lmem [get_bd_addr_spaces CV32E40P/m_axi_data] [get_bd_addr_segs rv_dmem_ctrl/S_AXI/Mem0] SEG_rv_dmem_ctrl_Mem0
++  create_bd_addr_seg -range $lmem -offset 0x00000000 [get_bd_addr_spaces CV32E40P/m_axi_instr] [get_bd_addr_segs rv_imem_ctrl/S_AXI/Mem0] SEG_rv_imem_ctrl_Mem0
++}
++
++proc get_external_mem_addr_space {} {
++  return [get_bd_addr_spaces CV32E40P/m_axi_data]
++}
+diff --git a/specific_tcl/cv32e40p_pe_project.tcl b/specific_tcl/cv32e40p_pe_project.tcl
+new file mode 100644
+index 0000000..455cd0d
+--- /dev/null
++++ b/specific_tcl/cv32e40p_pe_project.tcl
+@@ -0,0 +1,24 @@
++  # Create instance
++  set CV32E40P [ create_bd_cell -type ip -vlnv [dict get $cpu_vlnv $project_name] CV32E40P ]
++  set cpu_clk [get_bd_pins CV32E40P/clk_i]
++
++  # Create interface connections
++  set_property -dict [list CONFIG.AXI_PROTOCOL {AXI4LITE}] [get_bd_cells rv_imem_ctrl]
++  connect_bd_intf_net -intf_net CV32E40P_dbus [get_bd_intf_pins CV32E40P/m_axi_data] [get_bd_intf_pins axi_mem_intercon_1/S00_AXI]
++  set iaxi [get_bd_intf_pins CV32E40P/m_axi_instr]
++
++  # Create port connections
++  connect_bd_net -net RVController_0_rv_reset [get_bd_pins RVController_0/rv_reset] [get_bd_pins CV32E40P/rst_ni]
++  save_bd_design
++
++proc create_specific_addr_segs {} {
++  variable lmem
++  # Create address segments
++  create_bd_addr_seg -range 0x00010000 -offset 0x11000000 [get_bd_addr_spaces CV32E40P/m_axi_data] [get_bd_addr_segs RVController_0/saxi/reg0] SEG_RVController_0_reg0
++  create_bd_addr_seg -range $lmem -offset $lmem [get_bd_addr_spaces CV32E40P/m_axi_data] [get_bd_addr_segs rv_dmem_ctrl/S_AXI/Mem0] SEG_rv_dmem_ctrl_Mem0
++  create_bd_addr_seg -range $lmem -offset 0x00000000 [get_bd_addr_spaces CV32E40P/m_axi_instr] [get_bd_addr_segs rv_imem_ctrl/S_AXI/Mem0] SEG_rv_imem_ctrl_Mem0
++}
++
++proc get_external_mem_addr_space {} {
++  return [get_bd_addr_spaces CV32E40P/m_axi_data]
++}

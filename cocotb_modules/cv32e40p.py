@@ -7,7 +7,6 @@ import os
 # preload memory model
 memory = [0]*(0x100000)
 mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
-#mem_bin = open("/home/wimi/ms/Downloads/tb.bin", "rb").read()
 no_words = int(len(mem_bin)/4)
 no_bytes = int(len(mem_bin))
 for i in range(no_bytes):
@@ -39,10 +38,10 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
             if not we:
                 try:
                     be = 0xf if obi_prefix != "data" else (dut.data_be_o.value)
-                    nbl_0 = memory[addr] if (be & 1) != 0 else 0
-                    nbl_1 = memory[addr+1] if (be & 2) != 0 else 0
-                    nbl_2 = memory[addr+2] if (be & 4) != 0 else 0
-                    nbl_3 = memory[addr+3] if (be & 8) != 0 else 0
+                    nbl_0 = memory[addr]
+                    nbl_1 = memory[addr+1]
+                    nbl_2 = memory[addr+2]
+                    nbl_3 = memory[addr+3]
                     next_r = nbl_0 + (nbl_1<<8) + (nbl_2<<16) + (nbl_3<<24)
                     if not we and dbg:
                         print(f"{dbg_name} read data: 'h{int(next_r):08x} : 'h{int(be):01x}")

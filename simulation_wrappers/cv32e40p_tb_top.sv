@@ -178,7 +178,7 @@ logic [31:0] reg_write_cold_data;
 assign reg_write_cold_addr = reg_write_cold_u_to_c[36:32];
 assign reg_write_cold_data = reg_write_cold_u_to_c[31:0];
 
-cv32e40p_core #(
+cv32e40p_top #(
     .FPU                      ( 0 ),
     .FPU_ADDMUL_LAT           ( 0 ),
     .FPU_OTHERS_LAT           ( 0 ),
@@ -261,17 +261,7 @@ cv32e40p_core #(
 
     .ctx_stall_mret_i(~RDY_mret_u_to_c),
 
-    .ctx_reg_hot_write_trace_o(reg_hot_write_trace_addrs_c_to_u),
-
-    .apu_busy_o    (),
-    .apu_req_o     (),
-    .apu_gnt_i     (0),
-    .apu_operands_o(),
-    .apu_op_o      (),
-    .apu_flags_o   (),
-    .apu_rvalid_i  (0),
-    .apu_result_i  (0),
-    .apu_flags_i   (0)
+    .ctx_reg_hot_write_trace_o(reg_hot_write_trace_addrs_c_to_u)
 );
 
 // Instantiate mkRTOSUnitSynth

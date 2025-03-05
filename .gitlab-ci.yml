@@ -29,6 +29,8 @@ test_cva6:
     - popd
     - popd
     - make $CORE | tee logfile
+    - mkdir -p log/$CORE/$TEST
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
   artifacts:
     paths:
     - log/*

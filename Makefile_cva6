@@ -222,6 +222,9 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_tlb.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_shared_tlb.sv
 
 VERILOG_SOURCES += $(PWD)/simulation_wrappers/cva6_wrapper.sv
+VERILOG_SOURCES += $(PWD)/RTOSUnit/build/verilog/mkRTOSUnitSynth.v
+
+VERILOG_INCLUDE_DIRS += /opt/cad/bluespec/latest/lib/Verilog/
 
 # TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
 TOPLEVEL = cva6_ariane_wrapper

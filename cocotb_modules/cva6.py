@@ -42,7 +42,6 @@ async def wait_for_irq(dut, mem, dbg = False):
 
         if (irq != 0):
             print("got irq!")
-            sys.stdout.flush()
             return
         
 
@@ -62,7 +61,7 @@ async def run_program(dut):
     mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
     mem = mmap.mmap(-1, 0x40100000)
     mem[:] = b'\x00' * len(mem)
-    mem.write(mem_bin)
+    mem[0:len(mem_bin)] = mem_bin
 
     print("done loading memory")
 
@@ -81,3 +80,5 @@ async def run_program(dut):
 
     # wait for finished
     await irq
+    print("tst done")
+    sys.stdout.flush()

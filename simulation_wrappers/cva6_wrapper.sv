@@ -367,20 +367,86 @@ assign m_axi_ctrl_RREADY =  noc_req.r_ready;
 assign m_axi_ctrl_ARPROT = 'b11;
 assign m_axi_ctrl_AWPROT = 'b11;
 
-  cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
-        .clk_i,
-        .rst_ni,
-        .boot_addr_i,
-        .hart_id_i,
-        .irq_i,
-        .ipi_i,
-        .time_irq_i,
-        .debug_req_i,
-        .cvxif_resp_i(0),
-        .cvxif_req_o(),
-        .noc_resp_i(noc_resp),
-        .noc_req_o(noc_req),
-        .rvfi_probes_o()
+// cva6 <-> ctx wiring
+logic ctx_trap;
+logic ctx_mret;
+
+// Instantiate mkRTOSUnitSynth
+mkRTOSUnitSynth u_mkRTOSUnitSynth (
+    .CLK                        (clk_i),                      // Clock input
+    .RST_N                      (rst_ni),                    // Reset input
+
+    // Register Read Logic
+    .reg_read_addr_cold         (), // reg_read_addr_cold
+    .reg_read_data_cold_data    (0), // reg_read_data_cold_data
+
+    // Register Write Logic
+    .EN_reg_write_cold          (0), // EN_reg_write_cold
+    .reg_write_cold             (),    // reg_write_cold
+    .RDY_reg_write_cold         (), // RDY_reg_write_cold
+
+    // Cold Registers Logic
+    .cold_regs_in               (0),      // cold_regs_in
+
+    // Hot Register Write Logic
+    .reg_hot_write_trace_addrs   (0), // reg_hot_write_trace_addr
+
+    // Memory Read Data Logic
+    .mem_rd_data_d              (0),     // mem_rd_data_d
+    .EN_mem_rd_data             (0),    // EN_mem_rd_data
+
+    .mem_access                 (),
+    .EN_mem_access              (0),
+    .RDY_mem_access             (),
+
+    // Mstatus and Mepc Logic
+    .mstatus_out                (),       // mstatus_out
+    .mepc_out                   (),          // mepc_out
+
+    // Bank Switching Logic
+    .switch_bank_o              (),     // switch_bank_o
+
+    // Mret Logic
+    .EN_mret                    (ctx_mret),           // EN_mret
+    .mret                       (),              // mret
+    .RDY_mret                   (),          // RDY_mret
+
+    // CSR Write Logic
+    .write_csrs                 (),        // write_csrs
+
+    // Trap Logic
+    .trap_mstatus               (0),      // trap_mstatus
+    .trap_mepc                  (0),         // trap_mepc
+    .trap_mcause                (0),       // trap_mcause
+    .EN_trap                    (ctx_trap),           // EN_trap
+    .RDY_trap                   (),          // RDY_trap
+
+    // Custom Instruction Logic
+    .custom_inst_funct3         (),// custom_inst_funct3
+    .custom_inst_id             (),    // custom_inst_id
+    .custom_inst_prio           (),  // custom_inst_prio
+    .EN_custom_inst             (0),    // EN_custom_inst
+    .custom_inst                (),       // custom_inst
+    .RDY_custom_inst            ()    // RDY_custom_inst
+);
+
+cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
+    .clk_i,
+    .rst_ni,
+    .boot_addr_i,
+    .hart_id_i,
+    .irq_i,
+    .ipi_i,
+    .time_irq_i,
+    .debug_req_i,
+    .cvxif_resp_i(0),
+    .cvxif_req_o(),
+    .noc_resp_i(noc_resp),
+    .noc_req_o(noc_req),
+    .rvfi_probes_o(),
+
+    .ctx_trap_o(ctx_trap),
+    .ctx_mret_o(ctx_mret)
   );
 
 endmodule

@@ -12,6 +12,36 @@ variables:
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
 
+test_cva6:
+  stage: test
+  timeout: 5h
+  script:
+    - pip install --break-system-packages cocotb_bus cocotbext-axi
+    - git submodule update --init
+    - pushd RTOSUnit
+    - python3 /opt/bsvtools/bsvAdd.py
+    - popd
+    - export PATH=$BLUESPEC_HOME/bin:/opt/riscv/bin:$PATH
+    - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
+    - pushd freertos
+    - pushd RTOSBench
+    - patch -p1 < ../remove_intermediary_test_results.patch
+    - popd
+    - popd
+    - make $CORE | tee logfile
+  artifacts:
+    paths:
+    - log/*
+  parallel:
+    matrix:
+      - LOAD: SW
+        STORE: SW
+        SCHED: SW
+        LATCH: "NO"
+        DIRTY: N
+        TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [cva6]
+
 test_cv32e40p:
   stage: test
   timeout: 5h

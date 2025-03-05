@@ -1,0 +1,233 @@
+# Makefile
+
+# defaults
+SIM ?= verilator
+TOPLEVEL_LANG ?= verilog
+EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
+
+#FPGA memories
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/AsyncDpRam.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/AsyncThreePortRam.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncThreePortRam.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncDpRam_ind_r_w.sv
+
+VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/core/include/
+VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/include/
+VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/
+VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/vendor/pulp-platform/axi/include/
+VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/common/local/util/
+
+# Floating point unit
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_cast_multi.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_classifier.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_divsqrt_multi.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_fma_multi.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_fma.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_noncomp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_opgroup_block.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_opgroup_fmt_slice.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_opgroup_multifmt_slice.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_rounding.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpnew_top.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/defs_div_sqrt_mvp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/control_mvp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/div_sqrt_top_mvp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/iteration_div_sqrt_mvp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/norm_div_sqrt_mvp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/nrbd_nrsc_mvp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/preprocess_mvp.sv
+
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/config_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/cv32a6_ctx.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/riscv_pkg.sv
+# Note: depends on fpnew_pkg, above
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/ariane_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/axi/src/axi_pkg.sv
+
+# Packages
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/wt_cache_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/std_cache_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/instr_tracer_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/build_config_pkg.sv
+
+# CVXIF
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_compressed_if_driver.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_issue_register_commit_if_driver.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_example/include/cvxif_instr_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_fu.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_example/cvxif_example_coprocessor.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_example/instr_decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_example/compressed_instr_decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvxif_example/copro_alu.sv
+
+# Common Cells
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/cf_math_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/fifo_v3.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/lfsr.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/lfsr_8bit.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/stream_arbiter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/stream_arbiter_flushable.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/stream_mux.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/stream_demux.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/lzc.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/rr_arb_tree.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/shift_reg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/unread.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/popcount.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/exp_backoff.sv
+
+# Common Cells for example coprocessor
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/counter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/src/delta_counter.sv
+
+# Top-level source files (not necessarily instantiated at the top of the cva6).
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_rvfi_probes.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/alu.sv
+# Note: depends on fpnew_pkg, above
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/fpu_wrap.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/branch_unit.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/compressed_decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/macro_decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/controller.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/zcmt_decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/csr_buffer.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/csr_regfile.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/ex_stage.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/instr_realign.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/id_stage.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/issue_read_operands.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/issue_stage.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/load_unit.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/load_store_unit.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/lsu_bypass.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/mult.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/multiplier.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/serdiv.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/perf_counters.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/ariane_regfile_ff.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/ariane_regfile_fpga.sv
+# NOTE: scoreboard.sv modified for DSIM (unchanged for other simulators)
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/scoreboard.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/store_buffer.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/amo_buffer.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/store_unit.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/commit_stage.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/axi_shim.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_accel_first_pass_decoder_stub.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/acc_dispatcher.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_fifo_v3.sv
+
+# What is "frontend"?
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/frontend/btb.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/frontend/bht.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/frontend/ras.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/frontend/instr_scan.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/frontend/instr_queue.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/frontend/frontend.sv
+
+# Cache subsystem
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_dcache_ctrl.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_dcache_mem.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_dcache_missunit.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_dcache_wbuffer.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_dcache.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_icache.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_cache_subsystem.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/wt_axi_adapter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/tag_cmp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/axi_adapter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/miss_handler.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cache_ctrl.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_icache_axi_wrapper.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/std_cache_subsystem.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/std_nbdcache.sv
+
+VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/include
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/utils/hpdcache_mem_req_read_arbiter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/utils/hpdcache_mem_req_write_arbiter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_demux.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_lfsr.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_sync_buffer.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_fifo_reg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_fifo_reg_initialized.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_fxarb.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_rrarb.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_mux.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_decoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_1hot_to_binary.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_prio_1hot_encoder.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_sram.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_sram_wbyteenable.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_sram_wmask.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_regbank_wbyteenable_1rw.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_regbank_wmask_1rw.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_data_downsize.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_data_upsize.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/hpdcache_data_resize.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hwpf_stride/hwpf_stride_pkg.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hwpf_stride/hwpf_stride.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hwpf_stride/hwpf_stride_arb.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hwpf_stride/hwpf_stride_wrapper.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_amo.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_cmo.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_core_arbiter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_ctrl.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_ctrl_pe.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_memctrl.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_miss_handler.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_mshr.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_rtab.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_uncached.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_victim_plru.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_victim_random.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_victim_sel.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_wbuf.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/hpdcache_flush.sv
+
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/utils/hpdcache_mem_resp_demux.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/utils/hpdcache_mem_to_axi_read.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/utils/hpdcache_mem_to_axi_write.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_hpdcache_subsystem.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_hpdcache_subsystem_axi_arbiter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_hpdcache_if_adapter.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_hpdcache_wrapper.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/macros/behav/hpdcache_sram_1rw.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/macros/behav/hpdcache_sram_wbyteenable_1rw.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/hpdcache/rtl/src/common/macros/behav/hpdcache_sram_wmask_1rw.sv
+
+# Physical Memory Protection
+# NOTE: pmp.sv modified for DSIM (unchanged for other simulators)
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp_entry.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp_data_if.sv
+
+# Tracer (behavioral code, not RTL)
+VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/instr_tracer.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper_cache_techno.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram_cache.sv
+
+# MMU 
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_mmu.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_ptw.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_tlb.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_shared_tlb.sv
+
+VERILOG_SOURCES += $(PWD)/simulation_wrappers/cva6_wrapper.sv
+
+# TOPLEVEL is the name of the toplevel module in your Verilog or VHDL file
+TOPLEVEL = cva6_ariane_wrapper
+
+# MODULE is the basename of the Python test file
+MODULE = cocotb_modules.cva6
+
+# include cocotb's make rules to take care of the simulator setup
+include $(shell cocotb-config --makefiles)/Makefile.sim

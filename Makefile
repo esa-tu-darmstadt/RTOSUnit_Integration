@@ -18,3 +18,7 @@ ctxunit:
 .PHONY: cv32e40p
 cv32e40p: freertos ctxunit
 	make -f Makefile_cv32e40p
+
+.PHONY: cva6
+cva6: freertos ctxunit
+	PYTHONPATH=${PWD}/cocotb_modules make -f Makefile_cva6

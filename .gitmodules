@@ -10,3 +10,6 @@
 [submodule "cores/cv32e40p"]
 	path = cores/cv32e40p
 	url = ../cv32e40p
+[submodule "cores/cva6"]
+	path = cores/cva6
+	url = ../cva6.git

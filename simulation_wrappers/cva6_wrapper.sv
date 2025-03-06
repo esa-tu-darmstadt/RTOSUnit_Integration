@@ -371,6 +371,12 @@ assign m_axi_ctrl_AWPROT = 'b11;
 logic ctx_trap;
 logic ctx_mret;
 
+logic        ctx_inst_en;
+logic  [2:0] ctx_inst_funct3;
+logic [31:0] ctx_inst_rs1;
+logic [31:0] ctx_inst_rs2;
+logic [31:0] ctx_inst_rd;
+
 // Instantiate mkRTOSUnitSynth
 mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .CLK                        (clk_i),                      // Clock input
@@ -422,11 +428,11 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_trap                   (),          // RDY_trap
 
     // Custom Instruction Logic
-    .custom_inst_funct3         (),// custom_inst_funct3
-    .custom_inst_id             (),    // custom_inst_id
-    .custom_inst_prio           (),  // custom_inst_prio
-    .EN_custom_inst             (0),    // EN_custom_inst
-    .custom_inst                (),       // custom_inst
+    .custom_inst_funct3         (ctx_inst_funct3),// custom_inst_funct3
+    .custom_inst_id             (ctx_inst_rs1),    // custom_inst_id
+    .custom_inst_prio           (ctx_inst_rs2),  // custom_inst_prio
+    .EN_custom_inst             (ctx_inst_en),    // EN_custom_inst
+    .custom_inst                (ctx_inst_rd),       // custom_inst
     .RDY_custom_inst            ()    // RDY_custom_inst
 );
 
@@ -446,7 +452,13 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     .rvfi_probes_o(),
 
     .ctx_trap_o(ctx_trap),
-    .ctx_mret_o(ctx_mret)
+    .ctx_mret_o(ctx_mret),
+
+    .ctx_inst_funct3_o (ctx_inst_funct3),
+    .ctx_inst_rs1_o    (ctx_inst_rs1),
+    .ctx_inst_rs2_o    (ctx_inst_rs2),
+    .ctx_inst_en_o     (ctx_inst_en),
+    .ctx_inst_rd_i     (ctx_inst_rd)
   );
 
 endmodule

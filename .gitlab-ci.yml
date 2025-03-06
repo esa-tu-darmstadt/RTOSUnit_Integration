@@ -38,7 +38,7 @@ test_cva6:
     matrix:
       - LOAD: SW
         STORE: SW
-        SCHED: SW
+        SCHED: [SW, HW]
         LATCH: "NO"
         DIRTY: N
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]

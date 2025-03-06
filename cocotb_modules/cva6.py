@@ -14,11 +14,16 @@ async def reset_dut(reset_n, duration_ns):
     reset_n._log.debug("Reset complete")
 
 async def simulate_clint(dut, mem, dbg = False):
-    while True:
-        await RisingEdge(dut.clk_i)
+    addr_mtime = 0x4000BFF8
+    addr_mtimecmp = 0x40004000
 
-        addr_mtime = 0x4000BFF8
-        addr_mtimecmp = 0x40004000
+    while True:
+
+        await FallingEdge(dut.clk_i)
+        if os.environ.get('SCHED') == "HW" and dut.ctx_trap.value == 1 and  dut.ctx_mcause.value == 0x80000007:
+            mem[addr_mtime:addr_mtime+8] = b'\x00' * 8
+        
+        await RisingEdge(dut.clk_i)
 
         mtime    = int.from_bytes(mem[addr_mtime:addr_mtime+8], 'little')
         mtimecmp = int.from_bytes(mem[addr_mtimecmp:addr_mtimecmp+8], 'little')

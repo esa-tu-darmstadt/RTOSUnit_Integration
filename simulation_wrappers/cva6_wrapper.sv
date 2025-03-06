@@ -377,6 +377,11 @@ logic [31:0] ctx_inst_rs1;
 logic [31:0] ctx_inst_rs2;
 logic [31:0] ctx_inst_rd;
 
+//ctx
+logic [31:0] ctx_mstatus;
+logic [31:0] ctx_mepc;
+logic [31:0] ctx_mcause;
+
 // Instantiate mkRTOSUnitSynth
 mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .CLK                        (clk_i),                      // Clock input
@@ -421,9 +426,9 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .write_csrs                 (),        // write_csrs
 
     // Trap Logic
-    .trap_mstatus               (0),      // trap_mstatus
-    .trap_mepc                  (0),         // trap_mepc
-    .trap_mcause                (0),       // trap_mcause
+    .trap_mstatus               (ctx_mstatus),      // trap_mstatus
+    .trap_mepc                  (ctx_mepc),         // trap_mepc
+    .trap_mcause                (ctx_mcause),       // trap_mcause
     .EN_trap                    (ctx_trap),           // EN_trap
     .RDY_trap                   (),          // RDY_trap
 
@@ -458,7 +463,12 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     .ctx_inst_rs1_o    (ctx_inst_rs1),
     .ctx_inst_rs2_o    (ctx_inst_rs2),
     .ctx_inst_en_o     (ctx_inst_en),
-    .ctx_inst_rd_i     (ctx_inst_rd)
+    .ctx_inst_rd_i     (ctx_inst_rd),
+
+    //ctx
+    .ctx_mstatus_o(ctx_mstatus),
+    .ctx_mepc_o(ctx_mepc),
+    .ctx_mcause_o(ctx_mcause)
   );
 
 endmodule

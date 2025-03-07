@@ -326,7 +326,15 @@ module cva6_ariane_wrapper import ariane_pkg::*; #(
 	input  wire [5:0]   m_axi_ctrl_RID, //
 	input  wire [63:0]  m_axi_ctrl_RDATA, //
 	input  wire [1:0]   m_axi_ctrl_RRESP, //
-	input  wire         m_axi_ctrl_RLAST //
+	input  wire         m_axi_ctrl_RLAST, //
+
+    output logic        EN_ctx_mem_access,
+    output logic        ctx_mem_wr_en,
+    output logic [31:0] ctx_mem_addr,
+    output logic [31:0] ctx_mem_wr_data,
+
+    input logic        ctx_mem_rd_resp_valid,
+    input logic [31:0] ctx_mem_rd_data
 
 );
 noc_resp_t noc_resp;
@@ -381,20 +389,46 @@ logic [31:0] ctx_inst_rd;
 logic [31:0] ctx_mstatus;
 logic [31:0] ctx_mepc;
 logic [31:0] ctx_mcause;
+logic        ctx_stall_mret;
 
+logic         ctx_write_csrs;
+logic  [31:0] ctx_mepc_rest;
+logic  [31:0] ctx_mstatus_rest;
+
+// rf access
+logic        switch_bank;
+logic [ 4:0] raddr_cold;
+logic [31:0] rdata_cold;
+logic [ 4:0] waddr_cold;
+logic [31:0] wdata_cold;
+logic        we_cold;
+
+// write request separation
+logic [36:0] reg_write_cold_u_to_c;
+assign waddr_cold = reg_write_cold_u_to_c[36:32];
+assign wdata_cold = reg_write_cold_u_to_c[31:0];
+
+// memory access arbitration
+logic RDY_ctx_mem_access;
+logic [64:0] ctx_mem_access;
+
+assign EN_ctx_mem_access = ~m_axi_ctrl_AWVALID & ~m_axi_ctrl_ARVALID & RDY_ctx_mem_access;
+assign ctx_mem_addr      = ctx_mem_access[64:33];
+assign ctx_mem_wr_data   = ctx_mem_access[32:1];
+assign ctx_mem_wr_en     = ctx_mem_access[0];
 // Instantiate mkRTOSUnitSynth
 mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .CLK                        (clk_i),                      // Clock input
     .RST_N                      (rst_ni),                    // Reset input
 
     // Register Read Logic
-    .reg_read_addr_cold         (), // reg_read_addr_cold
-    .reg_read_data_cold_data    (0), // reg_read_data_cold_data
+    .reg_read_addr_cold         (raddr_cold), // reg_read_addr_cold
+    .reg_read_data_cold_data    (rdata_cold), // reg_read_data_cold_data
 
     // Register Write Logic
-    .EN_reg_write_cold          (0), // EN_reg_write_cold
-    .reg_write_cold             (),    // reg_write_cold
-    .RDY_reg_write_cold         (), // RDY_reg_write_cold
+    .EN_reg_write_cold          (we_cold), // EN_reg_write_cold
+    .reg_write_cold             (reg_write_cold_u_to_c),    // reg_write_cold
+    .RDY_reg_write_cold         (we_cold), // RDY_reg_write_cold
 
     // Cold Registers Logic
     .cold_regs_in               (0),      // cold_regs_in
@@ -403,27 +437,27 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .reg_hot_write_trace_addrs   (0), // reg_hot_write_trace_addr
 
     // Memory Read Data Logic
-    .mem_rd_data_d              (0),     // mem_rd_data_d
-    .EN_mem_rd_data             (0),    // EN_mem_rd_data
+    .mem_rd_data_d              (ctx_mem_rd_data),     // mem_rd_data_d
+    .EN_mem_rd_data             (ctx_mem_rd_resp_valid),    // EN_mem_rd_data
 
-    .mem_access                 (),
-    .EN_mem_access              (0),
-    .RDY_mem_access             (),
+    .mem_access                 (ctx_mem_access),
+    .EN_mem_access              (EN_ctx_mem_access),
+    .RDY_mem_access             (RDY_ctx_mem_access),
 
     // Mstatus and Mepc Logic
-    .mstatus_out                (),       // mstatus_out
-    .mepc_out                   (),          // mepc_out
+    .mstatus_out                (ctx_mstatus_rest),       // mstatus_out
+    .mepc_out                   (ctx_mepc_rest),          // mepc_out
 
     // Bank Switching Logic
-    .switch_bank_o              (),     // switch_bank_o
+    .switch_bank_o              (switch_bank),     // switch_bank_o
 
     // Mret Logic
     .EN_mret                    (ctx_mret),           // EN_mret
     .mret                       (),              // mret
-    .RDY_mret                   (),          // RDY_mret
+    .RDY_mret                   (ctx_stall_mret),          // RDY_mret
 
     // CSR Write Logic
-    .write_csrs                 (),        // write_csrs
+    .write_csrs                 (ctx_write_csrs),        // write_csrs
 
     // Trap Logic
     .trap_mstatus               (ctx_mstatus),      // trap_mstatus
@@ -468,7 +502,20 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     //ctx
     .ctx_mstatus_o(ctx_mstatus),
     .ctx_mepc_o(ctx_mepc),
-    .ctx_mcause_o(ctx_mcause)
+    .ctx_mcause_o(ctx_mcause),
+
+    .switch_bank_i(switch_bank),
+    .raddr_cold_i(raddr_cold),
+    .rdata_cold_o(rdata_cold),
+    .waddr_cold_i(waddr_cold),
+    .wdata_cold_i(wdata_cold),
+    .we_cold_i(we_cold),
+
+    .ctx_stall_i(~ctx_stall_mret),
+
+    .ctx_write_csrs_i(ctx_write_csrs),
+    .ctx_mepc_i(ctx_mepc_rest),
+    .ctx_mstatus_i(ctx_mstatus_rest)
   );
 
 endmodule

@@ -109,7 +109,7 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/multiplier.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/serdiv.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/perf_counters.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/ariane_regfile_ff.sv
-VERILOG_SOURCES += $(PWD)/cores/cva6/core/ariane_regfile_fpga.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/ariane_regfile_mux.sv
 # NOTE: scoreboard.sv modified for DSIM (unchanged for other simulators)
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/scoreboard.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/store_buffer.sv

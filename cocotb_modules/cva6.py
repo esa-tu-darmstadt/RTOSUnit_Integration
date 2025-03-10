@@ -12,23 +12,29 @@ rf_state = {}
 async def check_reg_str_rst(dut):
     while(os.environ.get('SCHED') == "HW" or os.environ.get('STORE') == "HW"):
         await FallingEdge(dut.clk_i)
-        rf = dut.cva6.issue_stage_i.i_issue_read_operands.i_ariane_regfile.i_ariane_regfile_1.mem_rd.value
-
-        ctx = dut.u_mkRTOSUnitSynth.r_ctxUnit_ctx_ids.value
 
         if (dut.ctx_trap.value == 1):
+            # get and save current state
+            rf = dut.cva6.issue_stage_i.i_issue_read_operands.i_ariane_regfile.i_ariane_regfile_1.mem_rd.value
+            ctx = dut.u_mkRTOSUnitSynth.r_ctxUnit_ctx_ids.value
             rf_state[int(ctx)] = rf
 
-        if (dut.ctx_mret.value == 1 and int(ctx) in rf_state):
-            golden = rf_state[int(ctx)]
-            if rf != golden:
-                print("mismatch between current rf and suspended rf:")
-                print("expected: ", end = "")
-                print(hex(golden))
-                print("got     : ", end = "")
-                print(hex(rf))
-                sys.stdout.flush()
-                raise Exception()
+        if (dut.ctx_mret.value == 1):
+            await FallingEdge(dut.clk_i) # wait additional cycle (needed for preload)
+            # get current state
+            rf = dut.cva6.issue_stage_i.i_issue_read_operands.i_ariane_regfile.i_ariane_regfile_1.mem_rd.value
+            ctx = dut.u_mkRTOSUnitSynth.r_ctxUnit_ctx_ids.value
+            # if state has already been saved, compare and lint
+            if int(ctx) in rf_state:
+                golden = rf_state[int(ctx)]
+                if rf != golden:
+                    print("mismatch between current rf and suspended rf:")
+                    print("expected: ", end = "")
+                    print(hex(golden))
+                    print("got     : ", end = "")
+                    print(hex(rf))
+                    sys.stdout.flush()
+                    raise Exception()
 
 async def reset_dut(reset_n, duration_ns):
     reset_n.value = 0

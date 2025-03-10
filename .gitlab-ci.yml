@@ -47,7 +47,14 @@ test_cva6:
         STORE: HW
         SCHED: [SW, HW]
         LATCH: "NO"
-        DIRTY: N
+        DIRTY: [N, Y]
+        TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [cva6]
+      - LOAD: HW
+        STORE: HW
+        SCHED: HW
+        LATCH: "LD"
+        DIRTY: [N]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
         CORE: [cva6]
 

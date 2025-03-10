@@ -416,6 +416,10 @@ assign EN_ctx_mem_access = ~m_axi_ctrl_AWVALID & ~m_axi_ctrl_ARVALID & RDY_ctx_m
 assign ctx_mem_addr      = ctx_mem_access[64:33];
 assign ctx_mem_wr_data   = ctx_mem_access[32:1];
 assign ctx_mem_wr_en     = ctx_mem_access[0];
+
+// hot regs
+logic [5:0] ctx_reg_hot_write_trace;
+
 // Instantiate mkRTOSUnitSynth
 mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .CLK                        (clk_i),                      // Clock input
@@ -434,7 +438,7 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .cold_regs_in               (0),      // cold_regs_in
 
     // Hot Register Write Logic
-    .reg_hot_write_trace_addrs   (0), // reg_hot_write_trace_addr
+    .reg_hot_write_trace_addrs   ({0, ctx_reg_hot_write_trace}), // reg_hot_write_trace_addr
 
     // Memory Read Data Logic
     .mem_rd_data_d              (ctx_mem_rd_data),     // mem_rd_data_d
@@ -515,7 +519,9 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
 
     .ctx_write_csrs_i(ctx_write_csrs),
     .ctx_mepc_i(ctx_mepc_rest),
-    .ctx_mstatus_i(ctx_mstatus_rest)
+    .ctx_mstatus_i(ctx_mstatus_rest),
+
+    .ctx_reg_hot_write_trace_o(ctx_reg_hot_write_trace)
   );
 
 endmodule

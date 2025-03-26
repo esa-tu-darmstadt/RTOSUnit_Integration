@@ -109,8 +109,6 @@ logic [31:0] data_addr_c;
 logic [31:0] data_wdata_c;
 logic [31:0] data_rdata_c;
 
-assign data_gnt_c = data_gnt_i;
-
 logic [64:0] ctx_mem_access;
 logic        EN_ctx_mem_access;
 logic        RDY_ctx_mem_access;
@@ -129,11 +127,16 @@ logic [2:0] src_arr [3:0];
 logic ctx_mem_rd_resp_valid;
 logic [31:0] ctx_mem_rd_data;
 
+// write request separation
+logic [4:0] reg_write_cold_addr;
+logic [31:0] reg_write_cold_data;
+
+assign data_gnt_c = data_gnt_i;
+
 // store source of a request
 always_ff @(posedge clk_i) begin
     if (!rst_ni) begin
         rq_ptr <= 0;
-        rs_ptr <= 0;
     end else begin
         src_arr[rq_ptr] <= {data_req_c, ctx_mem_wr_en && EN_ctx_mem_access, EN_ctx_mem_access && ~ctx_mem_wr_en};
         if (data_req_c | EN_ctx_mem_access) begin
@@ -151,16 +154,21 @@ always_comb begin
     ctx_mem_rd_resp_valid = data_rvalid_d & src_arr[rs_ptr][0];
 end
 
-// advance response destination pointer
-always_ff @(posedge clk_i) begin
-    if (rst_ni && data_rvalid_d) rs_ptr <= rs_ptr + 1;
-end
-
 // arbitrate memory bus between CPU and RTOSUNIT
 assign EN_ctx_mem_access = ~data_req_c & RDY_ctx_mem_access;
 assign ctx_mem_addr      = ctx_mem_access[64:33];
 assign ctx_mem_wr_data   = ctx_mem_access[32:1];
 assign ctx_mem_wr_en     = ctx_mem_access[0];
+
+// write request separation
+assign reg_write_cold_addr = reg_write_cold_u_to_c[36:32];
+assign reg_write_cold_data = reg_write_cold_u_to_c[31:0];
+
+// advance response destination pointer
+always_ff @(posedge clk_i) begin
+    if (!rst_ni) rs_ptr <= 0;
+    else if (data_rvalid_d) rs_ptr <= rs_ptr + 1;
+end
 
 // build output signals for memory bus
 always_comb begin
@@ -171,12 +179,6 @@ always_comb begin
     data_addr_o  = data_req_c ?  data_addr_c  :  ctx_mem_addr;
     data_wdata_o = data_req_c ? data_wdata_c  :  ctx_mem_wr_data;
 end
-
-// write request separation
-logic [4:0] reg_write_cold_addr;
-logic [31:0] reg_write_cold_data;
-assign reg_write_cold_addr = reg_write_cold_u_to_c[36:32];
-assign reg_write_cold_data = reg_write_cold_u_to_c[31:0];
 
 cv32e40p_top #(
     .FPU                      ( 0 ),

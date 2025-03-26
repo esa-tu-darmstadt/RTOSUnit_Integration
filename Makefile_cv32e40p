@@ -3,7 +3,7 @@
 # defaults
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
-EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC
+EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-NOLATCH -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC
 
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_apu_core_pkg.sv
 VERILOG_SOURCES += $(PWD)/cores/cv32e40p/rtl/include/cv32e40p_fpu_pkg.sv

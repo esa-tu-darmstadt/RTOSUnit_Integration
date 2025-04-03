@@ -18,6 +18,12 @@ async def check_reg_str_rst(dut):
             rf = dut.cva6.issue_stage_i.i_issue_read_operands.i_ariane_regfile.i_ariane_regfile_1.mem_rd.value
             ctx = dut.u_mkRTOSUnitSynth.r_ctxUnit_ctx_ids.value
             rf_state[int(ctx)] = rf
+            # check for wrong causes
+            await FallingEdge(dut.clk_i)
+            if dut.ctx_mcause.value != 0x80000007 and dut.ctx_mcause.value != 0xb:
+                print(f"Shady interrupt cause {hex(dut.ctx_mcause.value)}! Abort!")
+                sys.stdout.flush()
+                raise Exception()
 
         if (dut.ctx_mret.value == 1):
             await FallingEdge(dut.clk_i) # wait additional cycle (needed for preload)
@@ -35,6 +41,10 @@ async def check_reg_str_rst(dut):
                     print(hex(rf))
                     sys.stdout.flush()
                     raise Exception()
+            if int(ctx) == 0:
+                print("Restoring from zero! Abort!")
+                sys.stdout.flush()
+                raise Exception()
 
 async def reset_dut(reset_n, duration_ns):
     reset_n.value = 0

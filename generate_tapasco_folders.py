@@ -17,7 +17,7 @@ configs = {
     "HW-SD_HW-Sc"      : "LOAD=SW STORE=HW SCHED=HW LATCH=NO DIRTY=Y",
     "HW-SD_HW-L-HW-Sc" : "LOAD=HW STORE=HW SCHED=HW LATCH=NO DIRTY=Y",
 
-    "HW-S_HW-PL-HW-Sc" : "LOAD=HW STORE=HW SCHED=HW LATCH=NO DIRTY=N"
+    "HW-S_HW-PL-HW-Sc" : "LOAD=HW STORE=HW SCHED=HW LATCH=LD DIRTY=N"
 }
 
 if __name__ == "__main__":

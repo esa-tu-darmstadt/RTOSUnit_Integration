@@ -117,10 +117,11 @@ async def clint(dut, dbg_name, dbg = False):
                     mtimecmp = dut.data_wdata_o.value
                 elif addr == 0x40004004:
                     mtimecmp_h = dut.data_wdata_o.value
-            
-        #if dut.u_core.ctx_trap_o.value == 1 and  dut.u_core.ctx_mcause_o == 0x80000007:
-        #    mtime = 0
-        #    mtime_h = 0
+
+        if os.environ.get('SCHED') == "HW" and dut.EN_trap_c_to_u.value == 1 and (int(dut.trap_mcause_c_to_u.value) == 0x80000007 or int(dut.trap_mcause_c_to_u.value) == 0x7):
+            mtime = 0
+            mtime_h = 0
+            print("clear CLINT")
             
         await FallingEdge(dut.clk_i)
         # write data
@@ -130,8 +131,7 @@ async def clint(dut, dbg_name, dbg = False):
         # test condition
         if ((mtime_h << 32) + mtime) >= ((mtimecmp_h << 32) + mtimecmp):
             dut.irq_i.value = (1 << 7)
-            if dbg:
-                print("Trigger irq")
+            #print("Trigger irq")
         else:
             dut.irq_i.value = 0
 

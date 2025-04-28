@@ -135,6 +135,10 @@ async def clint(dut, dbg_name, dbg = False):
         else:
             dut.irq_i.value = 0
 
+        # debug
+        if ((mtime_h << 32) + mtime) == ((mtimecmp_h << 32) + mtimecmp):
+            print("Trigger irq")
+
         # advance counter
         new_mtime = ((mtime_h << 32) + mtime) + 1
         mtime = new_mtime & 0xffffffff

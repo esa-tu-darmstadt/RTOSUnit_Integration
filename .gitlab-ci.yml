@@ -11,6 +11,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
+  ALWAYS_LOAD: 1
 
 test_cva6:
   stage: test

@@ -1,10 +1,10 @@
 # Makefile
 
 # defaults
-SIM ?= questa
+SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
-#EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-PINMISSING -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
-SIM_ARGS = -suppress 8386
+EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-PINMISSING -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
+#SIM_ARGS = -suppress 8386
 
 #FPGA memories
 #VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv

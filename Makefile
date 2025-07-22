@@ -23,6 +23,10 @@ cv32e40p: freertos ctxunit
 cva6: freertos ctxunit
 	PYTHONPATH=${PWD}/cocotb_modules make -f Makefile_cva6
 
-.PHONY: gls
-gls: freertos
+.PHONY: gls_cv32e40p
+gls_cv32e40p: freertos
 	make -f Makefile_cv32e40p_gls clean all
+
+.PHONY: gls_cva6
+gls_cva6: freertos
+	make -f Makefile_cva6_gls clean all

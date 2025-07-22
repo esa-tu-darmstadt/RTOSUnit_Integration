@@ -22,6 +22,7 @@ async def reset_dut(dut, reset_n, duration_ns):
     await FallingEdge(dut.clk_i)
     reset_n.value = 1
     reset_n._log.debug("Reset complete")
+    print("reset done")
 
 async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
     while True:
@@ -149,31 +150,36 @@ async def run_program(dut):
     """Run binary."""
 
     # tie off unused signals
-    dut.pulp_clock_en_i.value = 1
-    dut.scan_cg_en_i.value = 1
-    dut.boot_addr_i.value = 0
-    dut.mtvec_addr_i.value = 0x100
-    dut.dm_halt_addr_i.value = 0
-    dut.hart_id_i.value = 0
-    dut.dm_exception_addr_i.value = 0
-    dut.debug_req_i.value = 0
-    dut.fetch_enable_i.value = 1
-    dut.irq_i.value = 0
-    dut.shift_enable.value = 0
-    dut.SI1.value = 0
-    dut.test_mode.value = 0
+    dut.pulp_clock_en_i.setimmediatevalue(0)
+    dut.scan_cg_en_i.setimmediatevalue(1)
+    dut.boot_addr_i.setimmediatevalue(0)
+    dut.mtvec_addr_i.setimmediatevalue(0x100)
+    dut.dm_halt_addr_i.setimmediatevalue(0)
+    dut.hart_id_i.setimmediatevalue(0)
+    dut.dm_exception_addr_i.setimmediatevalue(0)
+    dut.debug_req_i.setimmediatevalue(0)
+    dut.fetch_enable_i.setimmediatevalue(1)
+    dut.irq_i.setimmediatevalue(0)
+    dut.shift_enable.setimmediatevalue(0)
+    dut.SI1.setimmediatevalue(0)
+    dut.test_mode.setimmediatevalue(0)
 
     # memory iface
     dut.instr_gnt_i.value = 1
     dut.data_gnt_i.value = 1
 
-    cocotb.start_soon(Clock(dut.clk_i, 2000, units="ns").start())
+    clk_p = 2
+
     cocotb.start_soon(memory_sim(dut, "I", "instr"))
     cocotb.start_soon(clint(dut, "CLINT", False))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
+    dut.clk_i.setimmediatevalue(0)
+    dut.rst_ni.setimmediatevalue(0)
+    await Timer(clk_p, units="ns")
+    cocotb.start_soon(Clock(dut.clk_i, clk_p, units="ns").start())
 
     # reset core
-    await reset_dut(dut, dut.rst_ni, 16000)
+    await reset_dut(dut, dut.rst_ni, clk_p*40)
     dut._log.debug("After reset")
 
     # wait for finished

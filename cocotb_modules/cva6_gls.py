@@ -1,16 +1,11 @@
 import cocotb
 from cocotb.triggers import FallingEdge, RisingEdge, Timer, ReadOnly
 from cocotb.clock import Clock
-from memutil import MemView, HierarchicalMemView, BytearrayMemView
 import sys
 import os
 import mmap
 import logging
 import amba
-from collections import deque
-
-mem_delay = 0
-# mem_delay = 10
 
 # TODO: also check epc address and mstatus
 rf_state = {}
@@ -51,9 +46,10 @@ async def check_reg_str_rst(dut):
                 sys.stdout.flush()
                 raise Exception()
 
-async def reset_dut(reset_n, duration_ns):
+async def reset_dut(clk, reset_n, duration_ns):
     reset_n.value = 0
     await Timer(duration_ns, units="ns")
+    await FallingEdge(clk)
     reset_n.value = 1
     reset_n._log.debug("Reset complete")
 
@@ -83,8 +79,6 @@ async def simulate_clint(dut, mem, dbg = False):
         mem[addr_mtime:addr_mtime+8] = int.to_bytes(mtime+1, 8, 'little')
 
 async def memory_sim_rtosunit(dut, mem, dbg = False):
-    mem_req_queue = deque([None] * mem_delay, maxlen=mem_delay + 1)
-
     while True:
         await FallingEdge(dut.clk_i)
         # check WE if available
@@ -101,19 +95,13 @@ async def memory_sim_rtosunit(dut, mem, dbg = False):
 
             mem[addr_ctx:addr_ctx+4] = int.to_bytes(int(data_ctx_w), 4, 'little')
 
-        if not we and ena == 1:
-            mem_req_queue.append(int.from_bytes(mem[addr_ctx:addr_ctx+4], "little"))
-        else:
-            mem_req_queue.append(None)
-
         await RisingEdge(dut.clk_i)
 
-        mem_res = mem_req_queue.popleft()
-        if mem_res is None:
-            dut.ctx_mem_rd_resp_valid.value = False
+        if ena == 1:
+            dut.ctx_mem_rd_resp_valid.value = not we
+            dut.ctx_mem_rd_data.value = int.from_bytes(mem[addr_ctx:addr_ctx+4], "little")
         else:
-            dut.ctx_mem_rd_resp_valid.value = True
-            dut.ctx_mem_rd_data.value = mem_res
+            dut.ctx_mem_rd_resp_valid.value = 0
 
 async def wait_for_irq(dut, mem, dbg = False):
     while True:
@@ -139,27 +127,80 @@ async def run_program(dut):
     dut.irq_i.value = 0
     dut.ipi_i.value = 0
     dut.debug_req_i.value = 0
+    dut.shift_enable.setimmediatevalue(0)
+    dut.test_mode.setimmediatevalue(0)
+    dut.m_axi_ctrl_RDATA.setimmediatevalue(0)
+    dut.time_irq_i.setimmediatevalue(0)
+
+    dut.m_axi_ctrl_AWREADY.setimmediatevalue(0)
+    dut.m_axi_ctrl_WREADY.setimmediatevalue(0)
+    dut.m_axi_ctrl_BVALID.setimmediatevalue(0)
+    dut.m_axi_ctrl_BID.setimmediatevalue(0)
+
+    dut.m_axi_ctrl_BRESP.setimmediatevalue(0)
+    dut.m_axi_ctrl_ARREADY.setimmediatevalue(0)
+    dut.m_axi_ctrl_RVALID.setimmediatevalue(0)
+    dut.m_axi_ctrl_RID.setimmediatevalue(0)
+
+    dut.m_axi_ctrl_RRESP.setimmediatevalue(0)
+    dut.m_axi_ctrl_RLAST.setimmediatevalue(0)
+    dut.m_axi_ctrl_RVALID.setimmediatevalue(0)
+    dut.m_axi_ctrl_RID.setimmediatevalue(0)
+
+    #dut.ctx_mem_rd_resp_valid.setimmediatevalue(0)
+    #dut.ctx_mem_rd_data.setimmediatevalue(0)
+    dut.rst_ni.setimmediatevalue(1)
+
+    if 'external_interrupt' in dut._sub_handles:
+        irq_signal = dut.external_interrupt
+        dut.external_interrupt.setimmediatevalue(0)
+    if 'interrupt' in dut._sub_handles:
+        irq_signal = dut.interrupt
+        dut.interrupt.setimmediatevalue(0)
+    if 'timer_interrupt' in dut._sub_handles:
+        dut.timer_interrupt.setimmediatevalue(0)
+
+    if 'm_axi_rlast' in dut._sub_handles:
+        dut.m_axi_rlast.setimmediatevalue(0)
+    if 'm_axi_ctrl_RLAST' in dut._sub_handles:
+        dut.m_axi_ctrl_RLAST.setimmediatevalue(0)
+    if 'VSS' in dut._sub_handles:
+        dut.VSS.setimmediatevalue(0)
+        dut.VDD.setimmediatevalue(1)
+    if 'shift_enable' in dut._sub_handles:
+        dut.shift_enable.setimmediatevalue(0)
+        dut.test_mode.setimmediatevalue(0)
+    if 'DFT_sdi_1' in dut._sub_handles:
+        dut.DFT_sdi_1.setimmediatevalue(0)
+    if 'SI1' in dut._sub_handles:
+        dut.SI1.setimmediatevalue(0)
+    if 'm_bram_data_dout' in dut._sub_handles:
+        dut.m_bram_data_dout.setimmediatevalue(0)
+        dut.m_bram_instr_dout.setimmediatevalue(0)
+
+
+    dut.ctx_mem_rd_resp_valid.setimmediatevalue(0)
+    dut.ctx_mem_rd_data.setimmediatevalue(0)
+    dut.SI1.setimmediatevalue(0)
+
 
     mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
-    # mem = mmap.mmap(-1, 0x40100000)
-    mem = bytearray(len(mem_bin))
-    # mem[:] = b'\x00' * len(mem)
+    mem = mmap.mmap(-1, 0x40100000)
+    mem[:] = b'\x00' * len(mem)
     mem[0:len(mem_bin)] = mem_bin
 
     print("done loading memory")
 
-    cocotb.start_soon(Clock(dut.clk_i, 1, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk_i, 10000, units="ns").start())
     cocotb.start_soon(simulate_clint(dut, mem, False))
     irq = cocotb.start_soon(wait_for_irq(dut, mem, True))
     cocotb.start_soon(memory_sim_rtosunit(dut, mem, True))
     #cocotb.start_soon(check_reg_str_rst(dut))
 
-    memsi = amba.AXI4Slave(dut, "m_axi_ctrl", dut.clk_i, HierarchicalMemView([]), big_endian=False, enable_prints=False, artificial_write_delay=mem_delay, artificial_read_delay=mem_delay)
-    memview = BytearrayMemView(mem, 0, 0x40100000, 0, auto_resize=True)
-    memsi.memview.children.append(memview)
+    amba.AXI4Slave(dut, "m_axi_ctrl", dut.clk_i, dut.rst_ni, mem, big_endian=False)
 
     # reset core
-    await reset_dut(dut.rst_ni, 400)
+    await reset_dut(dut.clk_i, dut.rst_ni, 800000)
     dut._log.debug("After reset")
     print("rst done")
     sys.stdout.flush()

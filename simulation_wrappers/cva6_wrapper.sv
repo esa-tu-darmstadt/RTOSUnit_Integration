@@ -383,7 +383,7 @@ logic        ctx_inst_en;
 logic  [2:0] ctx_inst_funct3;
 logic [31:0] ctx_inst_rs1;
 logic [31:0] ctx_inst_rs2;
-logic [31:0] ctx_inst_rd;
+logic [32:0] ctx_inst_rd;
 
 //ctx
 logic [31:0] ctx_mstatus;
@@ -435,10 +435,10 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_reg_write_cold         (we_cold), // RDY_reg_write_cold
 
     // Cold Registers Logic
-    .cold_regs_in               (0),      // cold_regs_in
+    .cold_regs_in               (928'b0),      // cold_regs_in
 
     // Hot Register Write Logic
-    .reg_hot_write_trace_addrs   ({0, ctx_reg_hot_write_trace}), // reg_hot_write_trace_addr
+    .reg_hot_write_trace_addrs   ({6'b0, ctx_reg_hot_write_trace}), // reg_hot_write_trace_addr
 
     // Memory Read Data Logic
     .mem_rd_data_d              (ctx_mem_rd_data),     // mem_rd_data_d
@@ -488,7 +488,7 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     .ipi_i,
     .time_irq_i,
     .debug_req_i,
-    .cvxif_resp_i(0),
+    .cvxif_resp_i(113'b0),
     .cvxif_req_o(),
     .noc_resp_i(noc_resp),
     .noc_req_o(noc_req),
@@ -501,7 +501,7 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     .ctx_inst_rs1_o    (ctx_inst_rs1),
     .ctx_inst_rs2_o    (ctx_inst_rs2),
     .ctx_inst_en_o     (ctx_inst_en),
-    .ctx_inst_rd_i     (ctx_inst_rd),
+    .ctx_inst_rd_i     (ctx_inst_rd[31:0]),
 
     //ctx
     .ctx_mstatus_o(ctx_mstatus),

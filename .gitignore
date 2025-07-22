@@ -2,3 +2,4 @@
 .bsv_tools
 build
 __pycache__
+freertos/all_builds

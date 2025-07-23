@@ -22,7 +22,9 @@ ifeq ($(LOAD),HW)
 	CFLAGS += -D HWLOAD
 endif
 
-#CFLAGS += -D TCB_HW
+ifeq ($(TCB),HW)
+	CFLAGS += -D TCB_HW
+endif
 
 ifeq ($(STORE),HW)
 	CFLAGS += -D HWSTORE

@@ -12,7 +12,14 @@ ifeq ($(filter $(STORE),SW HW),)
 $(error STORE must be set to either 'SW' or 'HW'.)
 endif
 
+TFM_ABI ?= N
+ifeq ($(filter $(TFM_ABI),Y N),)
+$(error STORE must be set to either 'Y' or 'N'.)
+endif
+
+
 CFLAGS = 
+LDFLAGS = 
 
 ifeq ($(SCHED),HW)
 	CFLAGS += -D HWSCHED -D HWSCHED_CLINT
@@ -30,17 +37,52 @@ ifeq ($(STORE),HW)
 	CFLAGS += -D HWSTORE
 endif
 
+
 XLEN ?= 32
+
+ifeq ($(TFM_ABI),N)
+# GCC
 CROSS   ?= riscv32-unknown-elf-
 CC      = $(CROSS)gcc
 CPP     = $(CROSS)cpp
 OBJCOPY = $(CROSS)objcopy
 OBJDUMP = $(CROSS)objdump
 ARCH    = $(CROSS)ar
-DEBUG ?= 0 
-
 MARCH = rv32im_zicsr
 MABI = ilp32
+
+else
+
+# CLANG
+CROSS   ?= /scratch/tfm/llvm-project/build/bin/
+CC      = $(CROSS)clang
+CPP     = $(CROSS)clang++
+OBJCOPY = $(CROSS)llvm-objcopy
+OBJDUMP = $(CROSS)llvm-objdump
+ARCH    = $(CROSS)llvm-ar
+# TODO do not hardcode
+CFLAGS += -isystem /scratch/tfm/isax-tools-integration/testbenches/freertos/picolibc/build/install/picolibc/riscv32-unknown-elf/include
+
+MARCH = rv32im_zicsr_ztf32m
+MABI = ilp32tfm32
+
+CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf7m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf8m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf9m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf10m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf11m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf12m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf13m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf14m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf15m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf16m\""
+
+# TODO do not hardcode
+LDFLAGS += 	-L/scratch/tfm/isax-tools-integration/testbenches/freertos/picolibc/build/install/picolibc/riscv32-unknown-elf/lib/
+endif
+
+DEBUG ?= 0
+
 STACK_SIZE = 300
 
 BUILD_DIR       = build
@@ -67,7 +109,7 @@ CFLAGS  += -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-D NB_ITER=20 \
 	-D NB_WORKLOAD_TASK=2 \
 	-D CTX_BASE=0x$(CTX_BASE)
-LDFLAGS = -nostartfiles \
+LDFLAGS += -nostartfiles \
 	-march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-Xlinker --gc-sections \
 	-Xlinker --defsym=__stack_size=$(STACK_SIZE) \
@@ -97,13 +139,15 @@ ASMS = start.S \
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%$(XLEN).o) $(ASMS:%.S=$(BUILD_DIR)/%$(XLEN).o)
 DEPS = $(SRCS:%.c=$(BUILD_DIR)/%$(XLEN).d) $(ASMS:%.S=$(BUILD_DIR)/%$(XLEN).d)
 
-all: bsv_binaries $(BUILD_DIR)/RTOSDemo$(XLEN).dump
+all: bsv_binaries $(BUILD_DIR)/RTOSDemo$(XLEN).dump $(BUILD_DIR)/RTOSDemo$(XLEN)_num.dump
 
 bsv_binaries: $(BUILD_DIR)/RTOSDemo$(XLEN).bin
 	python3 ./hexConverter.py $(BUILD_DIR)/RTOSDemo$(XLEN).bin -o $(BUILD_DIR)/RTOSDemo -b 0x80000
 
 $(BUILD_DIR)/RTOSDemo$(XLEN).dump: $(BUILD_DIR)/RTOSDemo$(XLEN).axf
 	$(OBJDUMP) -D $^ > $@
+$(BUILD_DIR)/RTOSDemo$(XLEN)_num.dump: $(BUILD_DIR)/RTOSDemo$(XLEN).axf
+	$(OBJDUMP) -D -M numeric $^ > $@
 
 $(BUILD_DIR)/RTOSDemo$(XLEN).bin: $(BUILD_DIR)/RTOSDemo$(XLEN).axf
 	$(OBJCOPY) -O binary $^ $@

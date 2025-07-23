@@ -1,0 +1,9 @@
+ifeq ($(ISR_RF_SIZE),)
+	ifeq ($(TCB),HW)
+		EXTRA_ARGS += -DISR_RF_SIZE=0
+	else
+		EXTRA_ARGS += -DISR_RF_SIZE=32
+	endif
+else
+	EXTRA_ARGS += -DISR_RF_SIZE=$(ISR_RF_SIZE)
+endif

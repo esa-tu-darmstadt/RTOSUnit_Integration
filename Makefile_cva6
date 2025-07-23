@@ -1,17 +1,12 @@
 # Makefile
 
+include Makefile_common
+
 # defaults
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
-EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-PINMISSING -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
+EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
 #SIM_ARGS = -suppress 8386
-
-#FPGA memories
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncDpRam.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/AsyncDpRam.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/AsyncThreePortRam.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncThreePortRam.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/fpga-support/rtl/SyncDpRam_ind_r_w.sv
 
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/core/include/
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/include/
@@ -41,7 +36,7 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/nrbd_nr
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/cvfpu/src/fpu_div_sqrt_mvp/hdl/preprocess_mvp.sv
 
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/config_pkg.sv
-VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/cv32a6_ctx_nocache.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/cv32a6_ctx.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/riscv_pkg.sv
 # Note: depends on fpnew_pkg, above
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/include/ariane_pkg.sv
@@ -147,7 +142,6 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/cva6_icache_axi_wrappe
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/std_cache_subsystem.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/cache_subsystem/std_nbdcache.sv
 
-
 # Physical Memory Protection
 # NOTE: pmp.sv modified for DSIM (unchanged for other simulators)
 VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp.sv
@@ -157,16 +151,12 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp_data_if.sv
 # Tracer (behavioral code, not RTL)
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/instr_tracer.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper_cache_techno.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
+#
+# can be removed for questa
+VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
+#
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram_cache.sv
-
-# MMU 
-#VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_mmu.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_ptw.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_tlb.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/core/cva6_mmu/cva6_shared_tlb.sv
 
 VERILOG_SOURCES += $(PWD)/simulation_wrappers/cva6_wrapper.sv
 VERILOG_SOURCES += $(PWD)/RTOSUnit/build/verilog/mkRTOSUnitSynth.v

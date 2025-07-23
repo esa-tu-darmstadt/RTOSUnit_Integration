@@ -1,5 +1,7 @@
 # Makefile
 
+include Makefile_common
+
 # defaults
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog

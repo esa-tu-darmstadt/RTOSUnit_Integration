@@ -51,6 +51,8 @@ ARCH    = $(CROSS)ar
 MARCH = rv32im_zicsr
 MABI = ilp32
 
+CFLAGS += -DMY_SHITTY_TARGET="\"\""
+
 else
 
 # CLANG
@@ -66,7 +68,7 @@ CFLAGS += -isystem /scratch/tfm/isax-tools-integration/testbenches/freertos/pico
 MARCH = rv32im_zicsr_ztf32m
 MABI = ilp32tfm32
 
-CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf7m\""
+# CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf7m\""
 # CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf8m\""
 # CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf9m\""
 # CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf10m\""
@@ -76,6 +78,8 @@ CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf7m\""
 # CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf14m\""
 # CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf15m\""
 # CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf16m\""
+CFLAGS += -DMY_SHITTY_TARGET="\"arch=+ztf32m\""
+CFLAGS += -DTFM_ABI
 
 # TODO do not hardcode
 LDFLAGS += 	-L/scratch/tfm/isax-tools-integration/testbenches/freertos/picolibc/build/install/picolibc/riscv32-unknown-elf/lib/

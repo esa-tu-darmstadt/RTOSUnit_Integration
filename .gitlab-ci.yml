@@ -31,7 +31,7 @@ test_cva6:
     - popd
     - make $CORE | tee logfile
     - mkdir -p log/$CORE/$TEST
-    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-TCB_$TCB-DIRTY_$DIRTY-LATCH_$LATCH
     - cat logfile | grep "got irq!"
   artifacts:
     paths:
@@ -41,6 +41,7 @@ test_cva6:
       - LOAD: SW
         STORE: SW
         SCHED: [SW, HW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: N
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -48,6 +49,7 @@ test_cva6:
       - LOAD: HW
         STORE: HW
         SCHED: [SW, HW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -55,6 +57,7 @@ test_cva6:
       - LOAD: HW
         STORE: HW
         SCHED: HW
+        TCB: SW
         LATCH: "LD"
         DIRTY: [N]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -85,7 +88,7 @@ test_cv32e40p:
     - popd
     - make $CORE | tee logfile
     - mkdir -p log/$CORE/$TEST
-    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-TCB_$TCB-DIRTY_$DIRTY-LATCH_$LATCH
   artifacts:
     paths:
     - log/*
@@ -94,6 +97,7 @@ test_cv32e40p:
       - LOAD: SW
         STORE: SW
         SCHED: [HW, SW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: N
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -101,6 +105,7 @@ test_cv32e40p:
       - LOAD: SW
         STORE: HW
         SCHED: [HW, SW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -108,6 +113,7 @@ test_cv32e40p:
       - LOAD: HW
         STORE: HW
         SCHED: [HW, SW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -115,6 +121,7 @@ test_cv32e40p:
       - LOAD: HW
         STORE: HW
         SCHED: HW
+        TCB: SW
         LATCH: "LD"
         DIRTY: [N]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -122,6 +129,7 @@ test_cv32e40p:
       - LOAD: HW
         STORE: HW
         SCHED: HW
+        TCB: SW
         TCB: HW
         LATCH: "NO"
         DIRTY: N
@@ -145,7 +153,7 @@ test_piccolo:
     - popd
     - make $CORE | tee logfile
     - mkdir -p log/$CORE/$TEST
-    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-DIRTY_$DIRTY-LATCH_$LATCH
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/LOAD_$LOAD-STORE_$STORE-SCHED_$SCHED-TCB_$TCB-DIRTY_$DIRTY-LATCH_$LATCH
     - grep "elapsed:" logfile
   artifacts:
     paths:
@@ -155,6 +163,7 @@ test_piccolo:
       - LOAD: SW
         STORE: SW
         SCHED: [HW, SW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: N
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -162,6 +171,7 @@ test_piccolo:
       - LOAD: SW
         STORE: HW
         SCHED: [HW, SW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -169,6 +179,7 @@ test_piccolo:
       - LOAD: HW
         STORE: HW
         SCHED: [HW, SW]
+        TCB: SW
         LATCH: "NO"
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
@@ -176,6 +187,7 @@ test_piccolo:
       - LOAD: HW
         STORE: HW
         SCHED: HW
+        TCB: SW
         LATCH: [ST]
         DIRTY: [N, Y]
         TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]

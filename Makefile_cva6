@@ -151,11 +151,15 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp_data_if.sv
 
 # Tracer (behavioral code, not RTL)
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/instr_tracer.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper.sv
-#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
-VERILOG_SOURCES += /scratch/ms/S4E/piccolo_multi_context_support/testbenches/cores/cva6_asic/out/MemViews/model/verilog/IN22FDX_S1PV_NFVG_W00064B064M04C128.v
-#VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram.sv
-VERILOG_SOURCES += $(PWD)/cores/cva6_asic/sram.sv
+
+ifeq ($(SRAM),1)
+	VERILOG_SOURCES += $(PWD)/cores/cva6_asic/sram_ft.sv
+	VERILOG_SOURCES += /scratch/ms/S4E/piccolo_multi_context_support/testbenches/cores/cva6_asic/out/MemViews/model/verilog/IN22FDX_S1PV_NFVG_W00064B064M04C128.v
+else
+	VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper.sv
+	VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
+	VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram.sv
+endif
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram_cache.sv
 
 VERILOG_SOURCES += $(PWD)/simulation_wrappers/cva6_wrapper.sv

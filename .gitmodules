@@ -13,3 +13,6 @@
 [submodule "cores/cva6"]
 	path = cores/cva6
 	url = ../cva6.git
+[submodule "cores/cva6_asic"]
+	path = cores/cva6_asic
+	url = git@gitlab.esa.informatik.tu-darmstadt.de:asic/multi-context-cva6-asic.git

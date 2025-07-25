@@ -1,6 +1,7 @@
 import cocotb
 from cocotb.triggers import FallingEdge, RisingEdge, Timer, ReadOnly
 from cocotb.clock import Clock
+from memutil import MemView, HierarchicalMemView, BytearrayMemView
 import sys
 import os
 import mmap
@@ -185,22 +186,25 @@ async def run_program(dut):
 
 
     mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
-    mem = mmap.mmap(-1, 0x40100000)
-    mem[:] = b'\x00' * len(mem)
+    # mem = mmap.mmap(-1, 0x40100000)
+    mem = bytearray(len(mem_bin))
+    # mem[:] = b'\x00' * len(mem)
     mem[0:len(mem_bin)] = mem_bin
 
     print("done loading memory")
 
-    cocotb.start_soon(Clock(dut.clk_i, 10000, units="ns").start())
+    cocotb.start_soon(Clock(dut.clk_i, 2, units="ns").start())
     cocotb.start_soon(simulate_clint(dut, mem, False))
     irq = cocotb.start_soon(wait_for_irq(dut, mem, True))
     cocotb.start_soon(memory_sim_rtosunit(dut, mem, True))
     #cocotb.start_soon(check_reg_str_rst(dut))
 
-    amba.AXI4Slave(dut, "m_axi_ctrl", dut.clk_i, dut.rst_ni, mem, big_endian=False)
+    memsi = amba.AXI4Slave(dut, "m_axi_ctrl", dut.clk_i, HierarchicalMemView([]), big_endian=False, enable_prints=False, artificial_write_delay=0, artificial_read_delay=0)
+    memview = BytearrayMemView(mem, 0, 0x40100000, 0, auto_resize=True)
+    memsi.memview.children.append(memview)
 
     # reset core
-    await reset_dut(dut.clk_i, dut.rst_ni, 800000)
+    await reset_dut(dut.clk_i, dut.rst_ni, 16)
     dut._log.debug("After reset")
     print("rst done")
     sys.stdout.flush()

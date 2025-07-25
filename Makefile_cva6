@@ -5,8 +5,9 @@ include Makefile_common
 # defaults
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
-EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
-#SIM_ARGS = -suppress 8386
+EXTRA_ARGS += --trace --trace-structs --no-timing -Wno-REALCVT -Wno-LATCH -Wno-ASCRANGE -Wno-SELRANGE -Wno-STMTDLY -Wno-BLKANDNBLK -Wno-UNOPTFLAT -Wno-COMBDLY -Wno-CASEINCOMPLETE -Wno-WIDTHEXPAND -Wno-WIDTHTRUNC -Wno-UNSIGNED -Wno-SYMRSVDWORD -Wno-WIDTHCONCAT
+#SIM_ARGS = -suppress 8386 
+#EXTRA_ARGS += +define+ISR_RF_SIZE=32
 
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/core/include/
 VERILOG_INCLUDE_DIRS += $(PWD)/cores/cva6/vendor/pulp-platform/common_cells/include/
@@ -150,12 +151,11 @@ VERILOG_SOURCES += $(PWD)/cores/cva6/core/pmp/src/pmp_data_if.sv
 
 # Tracer (behavioral code, not RTL)
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/instr_tracer.sv
-VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper.sv
-#
-# can be removed for questa
-VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
-#
-VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram.sv
+#VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/tc_sram_wrapper.sv
+#VERILOG_SOURCES += $(PWD)/cores/cva6/vendor/pulp-platform/tech_cells_generic/src/rtl/tc_sram.sv
+VERILOG_SOURCES += /scratch/ms/S4E/piccolo_multi_context_support/testbenches/cores/cva6_asic/out/MemViews/model/verilog/IN22FDX_S1PV_NFVG_W00064B064M04C128.v
+#VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram.sv
+VERILOG_SOURCES += $(PWD)/cores/cva6_asic/sram.sv
 VERILOG_SOURCES += $(PWD)/cores/cva6/common/local/util/sram_cache.sv
 
 VERILOG_SOURCES += $(PWD)/simulation_wrappers/cva6_wrapper.sv

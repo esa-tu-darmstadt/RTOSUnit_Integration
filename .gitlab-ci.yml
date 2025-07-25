@@ -10,7 +10,7 @@ variables:
   BLUESPEC_HOME: "/opt/cad/bluespec/latest"
   GIT_SUBMODULE_STRATEGY: recursive
   GIT_SUBMODULE_FORCE_HTTPS: "true"
-  GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
+  GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench :(exclude)cores/cva6_asic"
   ALWAYS_LOAD: 1
 
 test_cva6:

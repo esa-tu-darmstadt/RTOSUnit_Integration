@@ -37,6 +37,9 @@ ifeq ($(STORE),HW)
 	CFLAGS += -D HWSTORE
 endif
 
+ifeq ($(RV32I_CV32RT),Y)
+	CFLAGS += -D RV32I_CV32RT
+endif
 
 XLEN ?= 32
 

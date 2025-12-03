@@ -15,7 +15,11 @@ ifeq ($(ISR_RF_SIZE),)
 		ifeq ($(EMBEDDED_ABI),Y)
 			EXTRA_ARGS += -DISR_RF_SIZE=16
 		else
-			EXTRA_ARGS += -DISR_RF_SIZE=32
+			ifeq ($(RV32I_CV32RT),Y)
+				EXTRA_ARGS += -DISR_RF_SIZE=0 -DRV32I_CV32RT
+			else
+				EXTRA_ARGS += -DISR_RF_SIZE=32
+			endif
 		endif
 	endif
 else

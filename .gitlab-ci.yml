@@ -18,8 +18,6 @@ before_script:
   - git clean -xfd
   - git submodule foreach --recursive git reset --hard
   - git submodule foreach --recursive git clean -xfd
-  - git submodule update --recursive --init --checkout
-
 
 test_cva6:
   stage: test

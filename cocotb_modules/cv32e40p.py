@@ -26,18 +26,18 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
     while True:
         await FallingEdge(dut.clk_i)
         # check WE if available
-        we = False if obi_prefix != "data" else (dut.data_we_o.value == 1)
+        we = False if obi_prefix == "instr" else eval(f"dut.{obi_prefix}_we_o.value == 1")
         # read addr
         if eval(f"dut.{obi_prefix}_req_o.value") == 1:
             addr = eval(f"dut.{obi_prefix}_addr_o.value") & 0xfffffffc
             addr_pr = eval(f"dut.{obi_prefix}_addr_o.value")
             if dbg:
-                print(f"{dbg_name} {"read" if not we else "write"}: 'h{int(addr_pr):08x} {"" if not we else f": 'h{int(dut.data_wdata_o.value):016x} : 'h{int(dut.data_be_o.value):01x}"}")
+                print(f"{dbg_name} {"read" if not we else "write"}: 'h{int(addr_pr):08x} {"" if not we else f": 'h{int(eval(f"dut.{obi_prefix}_wdata_o.value")):016x} : 'h{int(eval(f"dut.{obi_prefix}_be_o.value")):01x}"}")
                 sys.stdout.flush()
             next_vld = True
             if not we:
                 try:
-                    be = 0xf if obi_prefix != "data" else (dut.data_be_o.value)
+                    be = 0xf if obi_prefix == "instr" else eval(f"dut.{obi_prefix}_be_o.value")
                     nbl_0 = memory[addr]
                     nbl_1 = memory[addr+1]
                     nbl_2 = memory[addr+2]
@@ -53,9 +53,9 @@ async def memory_sim(dut, dbg_name, obi_prefix, dbg = False):
             # write
             if we:
                 for i in range(4):
-                    be = dut.data_be_o.value[i]
+                    be = eval(f"dut.{obi_prefix}_be_o.value")[i]
                     addr_w = addr + i
-                    data_w = int(dut.data_wdata_o.value).to_bytes(4, byteorder = 'little')
+                    data_w = eval(f"int(dut.{obi_prefix}_wdata_o.value).to_bytes(4, byteorder = 'little')")
                     if be:
                         try:
                             memory[addr_w] = data_w[i]
@@ -167,12 +167,14 @@ async def run_program(dut):
     # memory iface
     dut.instr_gnt_i.value = 1
     dut.data_gnt_i.value = 1
+    dut.data_2_gnt_i.value = 1
 
     cocotb.start_soon(Clock(dut.clk_i, 1, units="ns").start())
     cocotb.start_soon(memory_sim(dut, "I", "instr"))
     cocotb.start_soon(clint(dut, "CLINT", False))
     cocotb.start_soon(check_assertions(dut))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
+    cocotb.start_soon(memory_sim(dut, "D2", "data_2", dbg=True))
 
     # reset core
     await reset_dut(dut.rst_ni, 500)

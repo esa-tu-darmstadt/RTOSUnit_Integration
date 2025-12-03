@@ -4,6 +4,10 @@ else
 	EXTRA_ARGS += -DGEN_RF_SIZE=32
 endif
 
+ifeq ($(DUAL_PORT),Y)
+	EXTRA_ARGS += -DDUAL_PORT
+endif
+
 ifeq ($(ISR_RF_SIZE),)
 	ifeq ($(TCB),HW)
 		EXTRA_ARGS += -DISR_RF_SIZE=0

@@ -30,6 +30,16 @@ module cv32e40p_tb_top (
     output logic [31:0] data_wdata_o,
     input  logic [31:0] data_rdata_i,
 
+    // secondary data memory interface - when using dual ported RTOSUNIT
+    output logic        data_2_req_o,
+    input  logic        data_2_gnt_i,
+    input  logic        data_2_rvalid_i,
+    output logic        data_2_we_o,
+    output logic [ 3:0] data_2_be_o,
+    output logic [31:0] data_2_addr_o,
+    output logic [31:0] data_2_wdata_o,
+    input  logic [31:0] data_2_rdata_i,
+
     // Interrupt inputs
     input  logic [31:0] irq_i,  // CLINT interrupts + CLINT extension interrupts
     output logic        irq_ack_o,
@@ -53,6 +63,15 @@ logic [31:0] data_rdata_d;
 always_ff @(posedge clk_i) begin
     data_rvalid_d <= data_rvalid_i;
     data_rdata_d <= data_rdata_i;
+end
+
+// latch response from OBI2
+logic        data_2_rvalid_d;
+logic [31:0] data_2_rdata_d;
+
+always_ff @(posedge clk_i) begin
+    data_2_rvalid_d <= data_2_rvalid_i;
+    data_2_rdata_d <= data_2_rdata_i;
 end
 
 // Register Read Logic
@@ -117,12 +136,6 @@ logic        RDY_ctx_mem_access;
 logic        ctx_mem_wr_en;
 logic [31:0] ctx_mem_addr;
 logic [31:0] ctx_mem_wr_data;
-logic ctx_mem_rd_rq_valid;
-
-// request source tracking
-logic [1:0] rq_ptr;
-logic [1:0] rs_ptr;
-logic [2:0] src_arr [3:0];
 
 logic ctx_mem_rd_resp_valid;
 logic [31:0] ctx_mem_rd_data;
@@ -130,55 +143,121 @@ logic [31:0] ctx_mem_rd_data;
 // write request separation
 logic [4:0] reg_write_cold_addr;
 logic [31:0] reg_write_cold_data;
-
-assign data_gnt_c = data_gnt_i;
-
-// store source of a request
-always_ff @(posedge clk_i) begin
-    if (!rst_ni) begin
-        rq_ptr <= 0;
-    end else begin
-        src_arr[rq_ptr] <= {data_req_c, ctx_mem_wr_en && EN_ctx_mem_access, EN_ctx_mem_access && ~ctx_mem_wr_en};
-        if (data_req_c | EN_ctx_mem_access) begin
-            rq_ptr <= rq_ptr + 1;
-        end
-    end
-end
-
-// distribute incoming reads
-always_comb begin
-    data_rdata_c = data_rdata_d;
-    ctx_mem_rd_data = data_rdata_d;
-
-    data_rvalid_c         = data_rvalid_d & src_arr[rs_ptr][2];
-    ctx_mem_rd_resp_valid = data_rvalid_d & src_arr[rs_ptr][0];
-end
-
-// arbitrate memory bus between CPU and RTOSUNIT
-assign EN_ctx_mem_access = ~data_req_c & RDY_ctx_mem_access;
-assign ctx_mem_addr      = ctx_mem_access[64:33];
-assign ctx_mem_wr_data   = ctx_mem_access[32:1];
-assign ctx_mem_wr_en     = ctx_mem_access[0];
-
 // write request separation
 assign reg_write_cold_addr = reg_write_cold_u_to_c[36:32];
 assign reg_write_cold_data = reg_write_cold_u_to_c[31:0];
 
-// advance response destination pointer
-always_ff @(posedge clk_i) begin
-    if (!rst_ni) rs_ptr <= 0;
-    else if (data_rvalid_d) rs_ptr <= rs_ptr + 1;
-end
+assign data_gnt_c = data_gnt_i;
 
-// build output signals for memory bus
-always_comb begin
-    data_req_o   = data_req_c | EN_ctx_mem_access;
+`ifndef DUAL_PORT
+    // request source tracking
+    logic [1:0] rq_ptr;
+    logic [1:0] rs_ptr;
+    logic [2:0] src_arr [3:0];
 
-    data_we_o    = data_req_c ?    data_we_c  :  ctx_mem_wr_en;
-    data_be_o    = data_req_c ?    data_be_c  :  'hf;
-    data_addr_o  = data_req_c ?  data_addr_c  :  ctx_mem_addr;
-    data_wdata_o = data_req_c ? data_wdata_c  :  ctx_mem_wr_data;
-end
+    // store source of a request
+    always_ff @(posedge clk_i) begin
+        if (!rst_ni) begin
+            rq_ptr <= 0;
+        end else begin
+            src_arr[rq_ptr] <= {data_req_c, ctx_mem_wr_en && EN_ctx_mem_access, EN_ctx_mem_access && ~ctx_mem_wr_en};
+            if (data_req_c | EN_ctx_mem_access) begin
+                rq_ptr <= rq_ptr + 1;
+            end
+        end
+    end
+
+    // distribute incoming reads
+    always_comb begin
+        data_rdata_c = data_rdata_d;
+        ctx_mem_rd_data = data_rdata_d;
+
+        data_rvalid_c         = data_rvalid_d & src_arr[rs_ptr][2];
+        ctx_mem_rd_resp_valid = data_rvalid_d & src_arr[rs_ptr][0];
+    end
+
+    // arbitrate memory bus between CPU and RTOSUNIT
+    assign EN_ctx_mem_access = ~data_req_c & RDY_ctx_mem_access;
+    assign ctx_mem_addr      = ctx_mem_access[64:33];
+    assign ctx_mem_wr_data   = ctx_mem_access[32:1];
+    assign ctx_mem_wr_en     = ctx_mem_access[0];
+
+    // advance response destination pointer
+    always_ff @(posedge clk_i) begin
+        if (!rst_ni) rs_ptr <= 0;
+        else if (data_rvalid_d) rs_ptr <= rs_ptr + 1;
+    end
+
+    // build output signals for memory bus
+    always_comb begin
+        data_req_o   = data_req_c | EN_ctx_mem_access;
+
+        data_we_o    = data_req_c ?    data_we_c  :  ctx_mem_wr_en;
+        data_be_o    = data_req_c ?    data_be_c  :  'hf;
+        data_addr_o  = data_req_c ?  data_addr_c  :  ctx_mem_addr;
+        data_wdata_o = data_req_c ? data_wdata_c  :  ctx_mem_wr_data;
+    end
+`else
+    // just forward cpu signals
+    always_comb begin
+        data_req_o   = data_req_c;
+
+        data_we_o    = data_we_c;
+        data_be_o    = data_be_c;
+        data_addr_o  = data_addr_c;
+        data_wdata_o = data_wdata_c;
+    end
+    // and wire responses directly to the CPU
+    always_comb begin
+        data_rdata_c = data_rdata_d;
+        data_rvalid_c = data_rvalid_d;
+    end
+
+    // wire RTOSUnit to second port
+    // ignore write responses
+    logic [1:0] rq_ptr;
+    logic [1:0] rs_ptr;
+    logic       src_arr [3:0];
+
+    // store source of a request
+    always_ff @(posedge clk_i) begin
+        if (!rst_ni) begin
+            rq_ptr <= 0;
+        end else begin
+            src_arr[rq_ptr] <= EN_ctx_mem_access && ~ctx_mem_wr_en;
+            if (EN_ctx_mem_access) begin
+                rq_ptr <= rq_ptr + 1;
+            end
+        end
+    end
+
+    // advance response destination pointer
+    always_ff @(posedge clk_i) begin
+        if (!rst_ni) rs_ptr <= 0;
+        else if (data_2_rvalid_d) rs_ptr <= rs_ptr + 1;
+    end
+
+    always_comb begin
+        ctx_mem_rd_data = data_2_rdata_d;
+        ctx_mem_rd_resp_valid = data_2_rvalid_d & src_arr[rs_ptr];
+    end
+
+    // arbitrate memory bus between CPU and RTOSUNIT
+    assign EN_ctx_mem_access = RDY_ctx_mem_access;
+    assign ctx_mem_addr      = ctx_mem_access[64:33];
+    assign ctx_mem_wr_data   = ctx_mem_access[32:1];
+    assign ctx_mem_wr_en     = ctx_mem_access[0];
+
+    // build output signals for memory bus
+    always_comb begin
+        data_2_req_o   = EN_ctx_mem_access;
+
+        data_2_we_o    = ctx_mem_wr_en;
+        data_2_be_o    = 'hf;
+        data_2_addr_o  = ctx_mem_addr;
+        data_2_wdata_o = ctx_mem_wr_data;
+    end
+`endif
 
 cv32e40p_top #(
     .FPU                      ( 0 ),

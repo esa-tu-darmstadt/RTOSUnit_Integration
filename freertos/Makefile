@@ -48,8 +48,16 @@ CPP     = $(CROSS)cpp
 OBJCOPY = $(CROSS)objcopy
 OBJDUMP = $(CROSS)objdump
 ARCH    = $(CROSS)ar
-MARCH = rv32im_zicsr
-MABI = ilp32
+
+ifeq ($(EMBEDDED_ABI),Y)
+  MARCH = rv32em_zicsr
+  MABI = ilp32e
+  CROSS = /scratch/ms/tools/riscv-toolchain-e/inst/bin/riscv32-unknown-elf-
+  CFLAGS += -D __riscv_32e
+else
+  MARCH = rv32im_zicsr
+  MABI = ilp32
+endif
 
 CFLAGS += -DMY_SHITTY_TARGET="\"\""
 

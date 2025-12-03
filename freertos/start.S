@@ -16,22 +16,24 @@ _start:
 	li x13, 0
 	li x14, 0
 	li x15, 0
-	li x16, 0
-	li x17, 0
-	li x18, 0
-	li x19, 0
-	li x20, 0
-	li x21, 0
-	li x22, 0
-	li x23, 0
-	li x24, 0
-	li x25, 0
-	li x26, 0
-	li x27, 0
-	li x28, 0
-	li x29, 0
-	li x30, 0
-	li x31, 0
+	#ifndef __riscv_32e
+		li x16, 0
+		li x17, 0
+		li x18, 0
+		li x19, 0
+		li x20, 0
+		li x21, 0
+		li x22, 0
+		li x23, 0
+		li x24, 0
+		li x25, 0
+		li x26, 0
+		li x27, 0
+		li x28, 0
+		li x29, 0
+		li x30, 0
+		li x31, 0
+	#endif
 init_stack:
 	la sp, _stack_top
 	call main

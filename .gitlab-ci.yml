@@ -13,6 +13,13 @@ variables:
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench :(exclude)cores/cva6_asic"
   ALWAYS_LOAD: 1
 
+before_script:
+  - git reset --hard
+  - git clean -xfd
+  - git submodule foreach --recursive git reset --hard
+  - git submodule foreach --recursive git clean -xfd
+
+
 test_cva6:
   stage: test
   timeout: 5h

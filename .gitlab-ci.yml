@@ -13,15 +13,14 @@ variables:
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
   ALWAYS_LOAD: 1
 
-before_script:
-  - git reset --hard
-  - git clean -xfd
-  - git submodule foreach --recursive git reset --hard
-  - git submodule foreach --recursive git clean -xfd
-
 test_cva6:
   stage: test
   timeout: 5h
+  before_script:
+    - git reset --hard
+    - git clean -xfd
+    - git submodule foreach --recursive git reset --hard
+    - git submodule foreach --recursive git clean -xfd
   script:
     - pip install --break-system-packages cocotb_bus cocotbext-axi
     - pushd RTOSUnit
@@ -79,6 +78,11 @@ test_cva6:
 test_cv32e40p:
   stage: test
   timeout: 5h
+  before_script:
+    - git reset --hard
+    - git clean -xfd
+    - git submodule foreach --recursive git reset --hard
+    - git submodule foreach --recursive git clean -xfd
   script:
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py
@@ -144,6 +148,11 @@ test_piccolo:
   stage: test
   timeout: 5h
   allow_failure: true
+  before_script:
+    - git reset --hard
+    - git clean -xfd
+    - git submodule foreach --recursive git reset --hard
+    - git submodule foreach --recursive git clean -xfd
   script:
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py

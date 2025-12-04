@@ -174,7 +174,7 @@ async def run_program(dut):
     cocotb.start_soon(clint(dut, "CLINT", False))
     cocotb.start_soon(check_assertions(dut))
     mem = cocotb.start_soon(memory_sim(dut, "D", "data"))
-    cocotb.start_soon(memory_sim(dut, "D2", "data_2", dbg=True))
+    cocotb.start_soon(memory_sim(dut, "D2", "data_2"))
 
     # reset core
     await reset_dut(dut.rst_ni, 500)

@@ -87,7 +87,6 @@ async def memory_sim_rtosunit(dut, mem, dbg = False):
 
     while True:
         await FallingEdge(dut.clk_i)
-        # check WE if available
         ena = dut.EN_ctx_mem_access.value
         we  = dut.ctx_mem_wr_en.value
         data_ctx_w = dut.ctx_mem_wr_data.value
@@ -141,9 +140,7 @@ async def run_program(dut):
     dut.debug_req_i.value = 0
 
     mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
-    # mem = mmap.mmap(-1, 0x40100000)
     mem = bytearray(len(mem_bin))
-    # mem[:] = b'\x00' * len(mem)
     mem[0:len(mem_bin)] = mem_bin
 
     print("done loading memory")

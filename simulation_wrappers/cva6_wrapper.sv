@@ -412,7 +412,11 @@ assign wdata_cold = reg_write_cold_u_to_c[31:0];
 logic RDY_ctx_mem_access;
 logic [64:0] ctx_mem_access;
 
-assign EN_ctx_mem_access = ~m_axi_ctrl_AWVALID & ~m_axi_ctrl_ARVALID & RDY_ctx_mem_access;
+`ifndef DUAL_PORT
+  assign EN_ctx_mem_access = ~m_axi_ctrl_AWVALID & ~m_axi_ctrl_ARVALID & RDY_ctx_mem_access;
+`else
+  assign EN_ctx_mem_access = RDY_ctx_mem_access;
+`endif
 assign ctx_mem_addr      = ctx_mem_access[64:33];
 assign ctx_mem_wr_data   = ctx_mem_access[32:1];
 assign ctx_mem_wr_en     = ctx_mem_access[0];

@@ -55,7 +55,7 @@ ARCH    = $(CROSS)ar
 ifeq ($(EMBEDDED_ABI),Y)
   MARCH = rv32em_zicsr
   MABI = ilp32e
-  CROSS = /scratch/ms/tools/riscv-toolchain-e/inst/bin/riscv32-unknown-elf-
+  CROSS = $(RISCV_EMBEDDED_CC)
   CFLAGS += -D __riscv_32e
 else
   MARCH = rv32im_zicsr

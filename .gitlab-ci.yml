@@ -12,6 +12,73 @@ variables:
   GIT_SUBMODULE_FORCE_HTTPS: "true"
   GIT_SUBMODULE_PATHS: ":(exclude)freertos/RTOSBench"
   ALWAYS_LOAD: 1
+  RISCV_EMBEDDED_CC: "/opt/riscv_e/bin/riscv32-unknown-elf-"
+
+test_cv32rt_EABI:
+  stage: test
+  timeout: 5h
+  script:
+    - pushd RTOSUnit
+    - python3 /opt/bsvtools/bsvAdd.py
+    - popd
+    - export PATH=$BLUESPEC_HOME/bin:/opt/riscv/bin:$PATH
+    - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
+    - pushd freertos
+    - pushd RTOSBench
+    - patch -p1 < ../remove_intermediary_test_results.patch
+    - popd
+    - popd
+    - make $CORE | tee logfile
+    - mkdir -p log/$CORE/$TEST
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/RV32RT_EABI
+  artifacts:
+    paths:
+    - log/*
+  parallel:
+    matrix:
+      - LOAD: SW
+        STORE: HW
+        SCHED: SW
+        TCB: SW
+        LATCH: "NO"
+        DIRTY: N
+        TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [cv32e40p]
+        EMBEDDED_ABI: Y
+        DUAL_PORT: Y
+
+test_cv32rt_ABI:
+  stage: test
+  timeout: 5h
+  script:
+    - pushd RTOSUnit
+    - python3 /opt/bsvtools/bsvAdd.py
+    - popd
+    - export PATH=$BLUESPEC_HOME/bin:/opt/riscv/bin:$PATH
+    - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
+    - pushd freertos
+    - pushd RTOSBench
+    - patch -p1 < ../remove_intermediary_test_results.patch
+    - popd
+    - popd
+    - make $CORE | tee logfile
+    - mkdir -p log/$CORE/$TEST
+    - cat logfile | grep TOOK | tee log/$CORE/$TEST/RV32RT_ABI
+  artifacts:
+    paths:
+    - log/*
+  parallel:
+    matrix:
+      - LOAD: SW
+        STORE: HW
+        SCHED: SW
+        TCB: SW
+        LATCH: "NO"
+        DIRTY: N
+        TEST: [context-switch/round_robin, mq/mq, mq/mq_processing, mutex/mutex_processing, semaphore/sem, semaphore/sem_prio, semaphore/sem_processing, semaphore/sem_workload, mq/mq_workload, mutex/mutex_workload, mutex/mutex, mutex/mutex_pip]
+        CORE: [cv32e40p]
+        RV32I_CV32RT: Y
+        DUAL_PORT: Y
 
 test_cva6:
   stage: test
@@ -22,7 +89,6 @@ test_cva6:
     - git submodule foreach --recursive git reset --hard
     - git submodule foreach --recursive git clean -xfd
   script:
-    - pip install --break-system-packages cocotb_bus cocotbext-axi
     - pushd RTOSUnit
     - python3 /opt/bsvtools/bsvAdd.py
     - popd
@@ -217,9 +283,6 @@ collect_results:
 plot_figs:
   stage: eval
   script:
-    - apt-get -y update
-    - apt-get -y install pip
-    - pip install --break-system-packages pandas matplotlib seaborn
     - python3 util/plot_logs.py
   artifacts:
     paths:

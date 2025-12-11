@@ -204,8 +204,8 @@ async def run_program(dut):
     cocotb.start_soon(simulate_clint(dut, mem, False))
     irq = cocotb.start_soon(wait_for_irq(dut, mem, False))
     cocotb.start_soon(memory_sim_rtosunit(dut, mem, False))
-    cocotb.start_soon(memory_sim_wr_cache(dut, mem, True))
-    cocotb.start_soon(memory_sim_rd_cache(dut, mem, True))
+    cocotb.start_soon(memory_sim_wr_cache(dut, mem, False))
+    cocotb.start_soon(memory_sim_rd_cache(dut, mem, False))
     #cocotb.start_soon(check_reg_str_rst(dut))
 
     memsi = amba.AXI4Slave(dut, "m_axi_ctrl", dut.clk_i, HierarchicalMemView([]), big_endian=False, enable_prints=False, artificial_write_delay=mem_delay, artificial_read_delay=mem_delay)

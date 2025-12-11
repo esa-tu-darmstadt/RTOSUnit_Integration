@@ -23,9 +23,10 @@ test_cv32rt_EABI:
     - popd
     - export PATH=$BLUESPEC_HOME/bin:/opt/riscv/bin:$PATH
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
+    - git submodule update --init freertos/RTOSBench
     - pushd freertos
     - pushd RTOSBench
-    - patch -p1 < ../remove_intermediary_test_results.patch
+    - git checkout && git reset --hard && patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
     - make $CORE | tee logfile
@@ -58,7 +59,7 @@ test_cv32rt_ABI:
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
     - pushd RTOSBench
-    - patch -p1 < ../remove_intermediary_test_results.patch
+    - git checkout && git reset --hard && patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
     - make $CORE | tee logfile
@@ -96,7 +97,7 @@ test_cva6:
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
     - pushd RTOSBench
-    - patch -p1 < ../remove_intermediary_test_results.patch
+    - git checkout && git reset --hard && patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
     - make $CORE | tee logfile
@@ -165,7 +166,7 @@ test_cv32e40p:
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
     - pushd RTOSBench
-    - patch -p1 < ../remove_intermediary_test_results.patch
+    - git checkout && git reset --hard && patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
     - make $CORE | tee logfile
@@ -234,7 +235,7 @@ test_piccolo:
     - echo LOAD $LOAD STORE $STORE SCHED $SCHED LATCH $LATCH DIRTY $DIRTY
     - pushd freertos
     - pushd RTOSBench
-    - patch -p1 < ../remove_intermediary_test_results.patch
+    - git checkout && git reset --hard && patch -p1 < ../remove_intermediary_test_results.patch
     - popd
     - popd
     - make $CORE | tee logfile

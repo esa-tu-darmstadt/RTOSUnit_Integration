@@ -139,7 +139,7 @@ module cva6_ariane_wrapper import ariane_pkg::*; #(
 
     localparam type lsu_ctrl_t = struct packed {
       `ifdef SCAIEV_MEM
-      logic 							rdMem_ISAX;
+      logic               rdMem_ISAX;
       `endif
       logic                             valid;
       logic [CVA6Cfg.VLEN-1:0]          vaddr;
@@ -275,67 +275,80 @@ module cva6_ariane_wrapper import ariane_pkg::*; #(
     parameter type acc_cfg_t = logic,
     parameter acc_cfg_t AccCfg = '0
 ) (
-    // Subsystem Clock - SUBSYSTEM
-    input logic clk_i,
-    // Asynchronous reset active low - SUBSYSTEM
-    input logic rst_ni,
-    // Reset boot address - SUBSYSTEM
-    input logic [CVA6Cfg.VLEN-1:0] boot_addr_i,
-    // Hard ID reflected as CSR - SUBSYSTEM
-    input logic [CVA6Cfg.XLEN-1:0] hart_id_i,
-    // Level sensitive (async) interrupts - SUBSYSTEM
-    input logic [1:0] irq_i,
-    // Inter-processor (async) interrupt - SUBSYSTEM
-    input logic ipi_i,
-    // Timer (async) interrupt - SUBSYSTEM
-    input logic time_irq_i,
-    // Debug (async) request - SUBSYSTEM
-    input logic debug_req_i,
-    // Probes to build RVFI, can be left open when not used - RVFI
-    output rvfi_probes_t rvfi_probes_o,
-	output wire         m_axi_ctrl_AWVALID,
-	input  wire         m_axi_ctrl_AWREADY, //
-	output wire [5:0]   m_axi_ctrl_AWID,
-	output wire [63:0]  m_axi_ctrl_AWADDR,
-	output wire [2:0]   m_axi_ctrl_AWSIZE,
-	output wire [7:0]   m_axi_ctrl_AWLEN,
-	output wire [1:0]   m_axi_ctrl_AWBURST,
-	output wire         m_axi_ctrl_WVALID,
-	input  wire         m_axi_ctrl_WREADY, //
-	output wire [63:0]  m_axi_ctrl_WDATA,
-	output wire [7:0]   m_axi_ctrl_WSTRB,
-	output wire         m_axi_ctrl_WLAST,
-	input  wire         m_axi_ctrl_BVALID, //
-	output wire         m_axi_ctrl_BREADY,
-	input  wire [5:0]   m_axi_ctrl_BID, //
-	input  wire [1:0]   m_axi_ctrl_BRESP, //
-	
-	output wire         m_axi_ctrl_ARVALID,
-	input  wire         m_axi_ctrl_ARREADY,//
-	output wire [5:0]   m_axi_ctrl_ARID,
-	output wire [63:0]  m_axi_ctrl_ARADDR,
-	output wire [2:0]   m_axi_ctrl_ARSIZE,
-	output wire [7:0]   m_axi_ctrl_ARLEN,
-	output wire [1:0]   m_axi_ctrl_ARBURST,
+  // Subsystem Clock - SUBSYSTEM
+  input logic clk_i,
+  // Asynchronous reset active low - SUBSYSTEM
+  input logic rst_ni,
+  // Reset boot address - SUBSYSTEM
+  input logic [CVA6Cfg.VLEN-1:0] boot_addr_i,
+  // Hard ID reflected as CSR - SUBSYSTEM
+  input logic [CVA6Cfg.XLEN-1:0] hart_id_i,
+  // Level sensitive (async) interrupts - SUBSYSTEM
+  input logic [1:0] irq_i,
+  // Inter-processor (async) interrupt - SUBSYSTEM
+  input logic ipi_i,
+  // Timer (async) interrupt - SUBSYSTEM
+  input logic time_irq_i,
+  // Debug (async) request - SUBSYSTEM
+  input logic debug_req_i,
+  // Probes to build RVFI, can be left open when not used - RVFI
+  output rvfi_probes_t rvfi_probes_o,
+  output wire         m_axi_ctrl_AWVALID,
+  input  wire         m_axi_ctrl_AWREADY, //
+  output wire [5:0]   m_axi_ctrl_AWID,
+  output wire [63:0]  m_axi_ctrl_AWADDR,
+  output wire [2:0]   m_axi_ctrl_AWSIZE,
+  output wire [7:0]   m_axi_ctrl_AWLEN,
+  output wire [1:0]   m_axi_ctrl_AWBURST,
+  output wire         m_axi_ctrl_WVALID,
+  input  wire         m_axi_ctrl_WREADY, //
+  output wire [63:0]  m_axi_ctrl_WDATA,
+  output wire [7:0]   m_axi_ctrl_WSTRB,
+  output wire         m_axi_ctrl_WLAST,
+  input  wire         m_axi_ctrl_BVALID, //
+  output wire         m_axi_ctrl_BREADY,
+  input  wire [5:0]   m_axi_ctrl_BID, //
+  input  wire [1:0]   m_axi_ctrl_BRESP, //
+  
+  output wire         m_axi_ctrl_ARVALID,
+  input  wire         m_axi_ctrl_ARREADY,//
+  output wire [5:0]   m_axi_ctrl_ARID,
+  output wire [63:0]  m_axi_ctrl_ARADDR,
+  output wire [2:0]   m_axi_ctrl_ARSIZE,
+  output wire [7:0]   m_axi_ctrl_ARLEN,
+  output wire [1:0]   m_axi_ctrl_ARBURST,
 
-    output wire [1:0]   m_axi_ctrl_ARPROT,
-    output wire [1:0]   m_axi_ctrl_AWPROT,
-	
-	input  wire         m_axi_ctrl_RVALID, //
-	output wire         m_axi_ctrl_RREADY,
-	input  wire [5:0]   m_axi_ctrl_RID, //
-	input  wire [63:0]  m_axi_ctrl_RDATA, //
-	input  wire [1:0]   m_axi_ctrl_RRESP, //
-	input  wire         m_axi_ctrl_RLAST, //
+  output wire [1:0]   m_axi_ctrl_ARPROT,
+  output wire [1:0]   m_axi_ctrl_AWPROT,
+  
+  input  wire         m_axi_ctrl_RVALID, //
+  output wire         m_axi_ctrl_RREADY,
+  input  wire [5:0]   m_axi_ctrl_RID, //
+  input  wire [63:0]  m_axi_ctrl_RDATA, //
+  input  wire [1:0]   m_axi_ctrl_RRESP, //
+  input  wire         m_axi_ctrl_RLAST, //
 
-    output logic        EN_ctx_mem_access,
-    output logic        ctx_mem_wr_en,
-    output logic [31:0] ctx_mem_addr,
-    output logic [31:0] ctx_mem_wr_data,
+  output logic        EN_ctx_mem_access,
+  output logic        ctx_mem_wr_en,
+  output logic [31:0] ctx_mem_addr,
+  output logic [31:0] ctx_mem_wr_data,
 
-    input logic        ctx_mem_rd_resp_valid,
-    input logic [31:0] ctx_mem_rd_data
+  input logic        ctx_mem_rd_resp_valid,
+  input logic [31:0] ctx_mem_rd_data,
 
+  output logic [31:0] write_addr,
+  output logic [31:0] write_data,
+  output logic write_ena,
+  output logic [1:0] write_size,
+  output logic [3:0] write_be,
+
+  output logic [31:0] read_addr,
+  input  logic [31:0] read_data,
+  input  logic read_resp,
+  output logic read_req,
+
+  output logic read_id,
+  input logic read_resp_id
 );
 noc_resp_t noc_resp;
 noc_req_t noc_req;
@@ -483,6 +496,12 @@ mkRTOSUnitSynth u_mkRTOSUnitSynth (
     .RDY_custom_inst            ()    // RDY_custom_inst
 );
 
+dcache_req_i_t wr_req_sigs;
+dcache_req_o_t wr_resp_sigs;
+
+dcache_req_i_t rd_req_sigs;
+dcache_req_o_t rd_resp_sigs;
+
 cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     .clk_i,
     .rst_ni,
@@ -525,7 +544,47 @@ cva6 #(.CVA6Cfg ( CVA6Cfg )) cva6(
     .ctx_mepc_i(ctx_mepc_rest),
     .ctx_mstatus_i(ctx_mstatus_rest),
 
-    .ctx_reg_hot_write_trace_o(ctx_reg_hot_write_trace)
+    .ctx_reg_hot_write_trace_o(ctx_reg_hot_write_trace),
+
+    .data_wr_o(wr_req_sigs),
+    .data_rd_o(rd_req_sigs),
+    .data_rd_i(rd_resp_sigs),
+    .data_wr_i(wr_resp_sigs)
   );
+
+  logic [9:0] addr_index;
+  always_ff @(posedge clk_i) begin
+    if (~rst_ni) begin
+      addr_index <= 0;
+      read_id <= 0;
+    end else 
+    if (rd_req_sigs.data_req) begin
+      addr_index <= rd_req_sigs.address_index;
+      read_id <= rd_req_sigs.data_id;
+    end
+  end
+
+  always_comb begin
+    write_addr = {wr_req_sigs.address_tag, wr_req_sigs.address_index} & 'hfffffffc;
+    write_data = wr_req_sigs.data_wdata;
+    write_ena = wr_req_sigs.data_req;
+    write_size = wr_req_sigs.data_size;
+    write_be = wr_req_sigs.data_be;
+
+    wr_resp_sigs.data_gnt = wr_req_sigs.data_req;
+    wr_resp_sigs.data_rdata = 0;
+    wr_resp_sigs.data_ruser = 0;
+    wr_resp_sigs.data_rid = 0;
+    wr_resp_sigs.data_rvalid = 0;
+
+    read_addr = {rd_req_sigs.address_tag, addr_index} & 'hfffffffc;
+    read_req = rd_req_sigs.tag_valid;
+
+    rd_resp_sigs.data_gnt = rd_req_sigs.data_req;
+    rd_resp_sigs.data_rdata = read_data;
+    rd_resp_sigs.data_ruser = 0;
+    rd_resp_sigs.data_rid = read_resp_id;
+    rd_resp_sigs.data_rvalid = read_resp;
+  end
 
 endmodule

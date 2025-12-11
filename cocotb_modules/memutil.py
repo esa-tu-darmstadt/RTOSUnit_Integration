@@ -14,11 +14,11 @@ def _extend_word(_st, word : BinaryValue, n_word_bits, big_endian) -> BinaryValu
         if (n_word_bits & 7) != 0 or (word.n_bits & 7) != 0:
             raise MemViewError("Word length is not in full bytes")
         # TODO: Does this work with big endian?
+
         word_new = BinaryValue(n_bits=n_word_bits, bigEndian=big_endian)
-        in_word_byte_rotate_amount = _st & ((n_word_bits>>3) - 1) #>>3 -> uint div by 8
-        word_new_buff = word.buff + (b'\x00' * ((n_word_bits - word.n_bits) >> 3))
-        word_new_buff = word_new_buff[in_word_byte_rotate_amount:] + word_new_buff[0:in_word_byte_rotate_amount] #Rotate depending on misalignment of _st by the word byte width
-        word_new.buff = word_new_buff
+        for i in range(0, n_word_bits, word.n_bits):
+            word_new[i+word.n_bits-1:i] = str(word)
+
         return word_new
     return word
 

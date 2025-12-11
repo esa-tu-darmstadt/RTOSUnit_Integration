@@ -114,6 +114,61 @@ async def memory_sim_rtosunit(dut, mem, dbg = False):
             dut.ctx_mem_rd_resp_valid.value = True
             dut.ctx_mem_rd_data.value = mem_res
 
+
+
+
+async def memory_sim_rd_cache(dut, mem, dbg = False):
+
+    mem_req_queue = deque([], maxlen=mem_delay + 1)
+
+    next_vld = False
+    next_data = 0
+
+    while True:
+        await FallingEdge(dut.clk_i)
+        rq = dut.read_req.value
+        addr  = dut.read_addr.value
+
+        # elapsing writes
+        if rq == 1:
+            if dbg:
+                print(f"Core read: {hex(addr)}")
+                sys.stdout.flush()
+
+            next_data = int.from_bytes(mem[addr:addr+4], "little")
+            next_vld = True
+            mem_req_queue.append(int(dut.read_id.value))
+        else:
+            next_vld = False
+
+        await RisingEdge(dut.clk_i)
+
+        dut.read_resp.value = 1 if next_vld else 0
+        dut.read_data.value = next_data
+        if next_vld:
+            dut.read_resp_id.value = mem_req_queue.popleft()
+
+async def memory_sim_wr_cache(dut, mem, dbg = False):
+
+    while True:
+        await FallingEdge(dut.clk_i)
+        we = dut.write_ena.value
+        be = dut.write_be.value
+        data = dut.write_data.value
+        addr = dut.write_addr.value
+        size = dut.write_size.value
+
+        # elapsing writes
+        if we == 1:
+            if dbg:
+                print(f"Core write: {hex(addr)} : {hex(data)} : {hex(be)} : {hex(size)}")
+                sys.stdout.flush()
+
+            for i in range(4):
+                if be[i] == 1:
+                    mem[addr+i] = int.to_bytes(int(data), 4, 'little')[i]
+
+
 async def wait_for_irq(dut, mem, dbg = False):
     while True:
         await RisingEdge(dut.clk_i)
@@ -140,15 +195,17 @@ async def run_program(dut):
     dut.debug_req_i.value = 0
 
     mem_bin = open(f"{os.getcwd()}/freertos/build/RTOSDemo32.bin", "rb").read()
-    mem = bytearray(len(mem_bin))
+    mem = bytearray(0x40100000)
     mem[0:len(mem_bin)] = mem_bin
 
     print("done loading memory")
 
     cocotb.start_soon(Clock(dut.clk_i, 1, units="ns").start())
     cocotb.start_soon(simulate_clint(dut, mem, False))
-    irq = cocotb.start_soon(wait_for_irq(dut, mem, True))
-    cocotb.start_soon(memory_sim_rtosunit(dut, mem, True))
+    irq = cocotb.start_soon(wait_for_irq(dut, mem, False))
+    cocotb.start_soon(memory_sim_rtosunit(dut, mem, False))
+    cocotb.start_soon(memory_sim_wr_cache(dut, mem, True))
+    cocotb.start_soon(memory_sim_rd_cache(dut, mem, True))
     #cocotb.start_soon(check_reg_str_rst(dut))
 
     memsi = amba.AXI4Slave(dut, "m_axi_ctrl", dut.clk_i, HierarchicalMemView([]), big_endian=False, enable_prints=False, artificial_write_delay=mem_delay, artificial_read_delay=mem_delay)

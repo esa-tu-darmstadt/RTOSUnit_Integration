@@ -1,18 +1,15 @@
 [submodule "freertos/RTOSBench"]
 	path = freertos/RTOSBench
-	url = https://github.com/Brannium/RTOSBench.git
+	url = https://github.com/RTOSUnit/RTOSBench.git
 [submodule "freertos/FreeRTOS-Kernel"]
-	path = freertos/FreeRTOS-Kernel
+	path = https://github.com/RTOSUnit/FreeRTOS.git
 	url = ../freertos
 [submodule "RTOSUnit"]
 	path = RTOSUnit
-	url = ../rtosunit
+	url = https://github.com/RTOSUnit/RTOSUnit.git
 [submodule "cores/cv32e40p"]
 	path = cores/cv32e40p
-	url = ../cv32e40p
+	url = https://github.com/RTOSUnit/cv32e40p.git
 [submodule "cores/cva6"]
 	path = cores/cva6
-	url = ../cva6.git
-[submodule "cores/cva6_asic"]
-	path = cores/cva6_asic
-	url = ../../../asic/multi-context-cva6-asic.git
+	url = https://github.com/RTOSUnit/cva6.git
